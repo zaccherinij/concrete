@@ -1,3 +1,14 @@
+# WARNING
+
+Development has moved to the [concrete crate](https://crates.io/crates/concrete). Watch out that your `Cargo.toml` file has the right following dependency:
+
+```toml
+[dependencies]
+concrete = "^0.1"
+```
+
+We thank [Daniel May](https://gitlab.com/danieljrmay) for supporting this project and donating the Concrete crate.
+
 # Concrete Operates oN Ciphertexts Rapidly by Extending TfhE
 
 Concrete is a [fully homomorphic encryption (FHE)](https://en.wikipedia.org/wiki/Homomorphic_encryption) library that implements Zama's variant of [TFHE](https://eprint.iacr.org/2018/421.pdf).
