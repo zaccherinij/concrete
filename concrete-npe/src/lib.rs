@@ -26,6 +26,7 @@ pub fn add_ciphertexts(var_ct1: f64, var_ct2: f64) -> f64 {
 /// Output
 /// * the variance of the sum of the ciphertexts
 pub fn add_several_ciphertexts(var_cts: &[f64]) -> f64 {
+    // impl Variance
     let mut res: f64 = 0.;
     for var in var_cts.iter() {
         res += *var;

@@ -25,6 +25,7 @@ use concrete_core::numeric::{CastFrom, CastInto, Numeric};
 
 mod bootstrap;
 mod keyswitch;
+mod multisum;
 mod random;
 
 criterion_group!(bootstrap_b, bootstrap::bench_32, bootstrap::bench_64);
@@ -37,5 +38,6 @@ criterion_group!(
     random::bench_64,
     random::bench_128
 );
+criterion_group!(multisum_b, multisum::bench_32, multisum::bench_64);
 
-criterion_main!(bootstrap_b, keyswitch_b, random_b);
+criterion_main!(bootstrap_b, keyswitch_b, random_b, multisum_b);

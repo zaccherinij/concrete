@@ -25,12 +25,12 @@ use concrete_core::math::tensor::{
 use concrete_core::numeric::{CastFrom, CastInto, Numeric};
 
 pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
-    let lwe_dimensions = vec![512]; // 512;
-    let l_gadgets = vec![1, 3, 10];
-    let rlwe_dimensions = vec![1, 2, 3];
-    let degrees = vec![1024];
+    let lwe_dimensions = vec![700];
+    let l_gadgets = vec![2];
+    let rlwe_dimensions = vec![1];
+    let degrees = vec![2048];
     let n_slots = 1;
-    let base_log = 7;
+    let base_log = 17;
     let std = f64::powi(2., -23);
 
     let params = iproduct!(lwe_dimensions, l_gadgets, rlwe_dimensions, degrees);
