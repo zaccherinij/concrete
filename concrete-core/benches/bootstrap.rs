@@ -25,17 +25,17 @@ use concrete_core::math::tensor::{
 use concrete_core::numeric::{CastFrom, CastInto, Numeric};
 
 pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
-    let lwe_dimensions = vec![700];
-    let l_gadgets = vec![2];
+    let lwe_dimensions = vec![600, 700, 800, 900];
+    let l_gadgets = vec![2, 3, 4];
     let rlwe_dimensions = vec![1];
-    let degrees = vec![2048];
+    let degrees = vec![1024];
     let n_slots = 1;
     let base_log = 17;
     let std = f64::powi(2., -23);
 
     let params = iproduct!(lwe_dimensions, l_gadgets, rlwe_dimensions, degrees);
 
-    let mut group = c.benchmark_group("compilo-bootstrap");
+    let mut group = c.benchmark_group("bootstrap");
     for p in params {
         // group.throughput(Throughput::Bytes(*size as u64));
         group.bench_with_input(

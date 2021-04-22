@@ -9,8 +9,9 @@ use concrete_core::crypto::glwe::{GlweCiphertext, GlweList};
 use concrete_core::crypto::lwe::{LweCiphertext, LweKeyswitchKey};
 use concrete_core::crypto::secret::{GlweSecretKey, LweSecretKey};
 use concrete_core::crypto::{
-    CiphertextCount, GlweDimension, LweDimension, LweSize, PlaintextCount,
+    CiphertextCount, GlweDimension, LweDimension, LweSize, PlaintextCount, UnsignedTorus,
 };
+use concrete_core::math::decomposition::{DecompositionBaseLog, DecompositionLevelCount};
 use concrete_core::math::dispersion::{DispersionParameter, LogStandardDev, Variance};
 use concrete_core::math::fft::{Complex64, Fft, FourierPolynomial};
 use concrete_core::math::polynomial::PolynomialSize;
@@ -23,36 +24,26 @@ use concrete_core::math::tensor::{
 };
 use concrete_core::numeric::{CastFrom, CastInto, Numeric};
 
-mod bootstrap;
-mod keyswitch;
-mod mac;
-mod multisum;
-mod random;
-mod rlwe_encrypt;
+pub fn bench(c: &mut Criterion) {
+    let degrees = vec![1024usize, 2048, 4096];
 
-criterion_group!(bootstrap_b, bootstrap::bench_32, bootstrap::bench_64);
-criterion_group!(keyswitch_b, keyswitch::bench_32, keyswitch::bench_64);
-criterion_group!(
-    random_b,
-    random::bench_8,
-    random::bench_16,
-    random::bench_32,
-    random::bench_64,
-    random::bench_128
-);
-criterion_group!(multisum_b, multisum::bench_32, multisum::bench_64);
-criterion_group!(mac_b, mac::bench);
-criterion_group!(
-    rlwe_encrypt_b,
-    rlwe_encrypt::bench_32,
-    rlwe_encrypt::bench_64
-);
+    let params = iproduct!(degrees);
 
-criterion_main!(
-    bootstrap_b,
-    keyswitch_b,
-    random_b,
-    multisum_b,
-    mac_b,
-    rlwe_encrypt_b
-);
+    let mut group = c.benchmark_group("fft_mac");
+    for p in params {
+        // group.throughput(Throughput::Bytes(*size as u64));
+        group.bench_with_input(BenchmarkId::from_parameter(format!("{}", p)), &p, |b, p| {
+            // --------> all allocation
+            let polynomial_size = PolynomialSize(*p);
+            let first = FourierPolynomial::allocate(Complex64::new(0., 0.), polynomial_size);
+            let second = FourierPolynomial::allocate(Complex64::new(0., 0.), polynomial_size);
+            let mut output = FourierPolynomial::allocate(Complex64::new(0., 0.), polynomial_size);
+
+            // allocate secret keys
+            b.iter(|| {
+                output.update_with_multiply_accumulate(&first, &second);
+            });
+        });
+    }
+    group.finish();
+}

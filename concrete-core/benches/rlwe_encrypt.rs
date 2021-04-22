@@ -4,9 +4,9 @@ use rand::Rng;
 
 use concrete_core::crypto::bootstrap::BootstrapKey;
 use concrete_core::crypto::cross::{bootstrap, cmux, constant_sample_extract, external_product};
-use concrete_core::crypto::encoding::{CleartextList, Plaintext, PlaintextList};
+use concrete_core::crypto::encoding::{Plaintext, PlaintextList};
 use concrete_core::crypto::glwe::{GlweCiphertext, GlweList};
-use concrete_core::crypto::lwe::{LweCiphertext, LweKeyswitchKey, LweList};
+use concrete_core::crypto::lwe::{LweCiphertext, LweKeyswitchKey};
 use concrete_core::crypto::secret::{GlweSecretKey, LweSecretKey};
 use concrete_core::crypto::{
     CiphertextCount, GlweDimension, LweDimension, LweSize, PlaintextCount, UnsignedTorus,
@@ -24,33 +24,35 @@ use concrete_core::math::tensor::{
 };
 use concrete_core::numeric::{CastFrom, CastInto, Numeric};
 
-pub fn bench<T: UnsignedTorus + RandomGenerable<UniformMsb>>(c: &mut Criterion) {
-    // fix a set of parameters
-    let multisum_size = vec![1024];
-    let dimension = vec![700];
-    let params = iproduct!(multisum_size, dimension);
-    let mut group = c.benchmark_group("multisum");
+pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
+    let rlwe_dimensions = vec![1];
+    let degrees = vec![1024];
+
+    let params = iproduct!(rlwe_dimensions, degrees);
+
+    let mut group = c.benchmark_group("rlwe_encrypt");
     for p in params {
         // group.throughput(Throughput::Bytes(*size as u64));
         group.bench_with_input(
-            BenchmarkId::from_parameter(format!("p={}-SumSize={}-n={}", T::BITS, p.0, p.1)),
+            BenchmarkId::from_parameter(format!("p={}-k={}-N={}", T::BITS, p.0, p.1,)),
             &p,
             |b, p| {
-                let sum_size = p.0;
-                let dimension = LweDimension(p.1);
-                let mut ciphertext_values = LweList::from_container(
-                    vec![T::ZERO; sum_size * dimension.to_lwe_size().0],
-                    dimension.to_lwe_size(),
+                // --------> all allocation
+                let polynomial_size = PolynomialSize(p.1);
+                let rlwe_dimension = GlweDimension(p.0);
+                let std = LogStandardDev::from_log_standard_dev(-29.);
+
+                // allocate secret keys
+                let mut rlwe_sk = GlweSecretKey::generate(rlwe_dimension, polynomial_size);
+
+                let mut ciphertext = GlweCiphertext::allocate(
+                    T::ZERO,
+                    polynomial_size,
+                    rlwe_dimension.to_glwe_size(),
                 );
+                let plaintext = PlaintextList::allocate(T::ZERO, PlaintextCount(polynomial_size.0));
 
-                let mut output =
-                    LweCiphertext::from_container(vec![T::ZERO; dimension.to_lwe_size().0]);
-                let weights = CleartextList::from_container(vec![T::ONE; sum_size]);
-                let bias = Plaintext(T::ONE);
-
-                b.iter(|| {
-                    output.fill_with_multisum_with_bias(&ciphertext_values, &weights, &bias);
-                });
+                b.iter(|| rlwe_sk.encrypt_glwe(&mut ciphertext, &plaintext, std));
             },
         );
     }

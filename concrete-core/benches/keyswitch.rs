@@ -36,7 +36,7 @@ pub fn bench<T: UnsignedTorus + RandomGenerable<UniformMsb>>(c: &mut Criterion) 
 
     let params = iproduct!(base_log_level, dimensions_before, dimensions_after);
 
-    let mut group = c.benchmark_group("compilo-keyswitch");
+    let mut group = c.benchmark_group("keyswitch");
     for p in params {
         // group.throughput(Throughput::Bytes(*size as u64));
         group.bench_with_input(
