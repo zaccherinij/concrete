@@ -227,7 +227,7 @@ impl<Cont> Polynomial<Cont> {
         )
     }
 
-    /// Fills the current polynomial, with the result of the (slow) product of two polynomials,
+    /// Fills the current polynomial, with the result of the product of two polynomials,
     /// reduced modulo $(X^N + 1)$.
     ///
     /// # Example
@@ -243,6 +243,38 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 45 as u8);
     /// ```
     pub fn fill_with_wrapping_mul<Coef, LhsCont, RhsCont>(
+        &mut self,
+        lhs: &Polynomial<LhsCont>,
+        rhs: &Polynomial<RhsCont>,
+    ) where
+        Self: AsMutTensor<Element = Coef>,
+        Polynomial<LhsCont>: AsRefTensor<Element = Coef>,
+        Polynomial<RhsCont>: AsRefTensor<Element = Coef>,
+        Coef: UnsignedInteger,
+    {
+        if self.polynomial_size().0 < KARATUSBA_STOP {
+            self.fill_with_wrapping_schoolbook(lhs, rhs);
+        } else {
+            self.fill_with_karatsuba(lhs, rhs);
+        }
+    }
+
+    /// Fills the current polynomial, with the result of the slow product (schoolbook algorithm)
+    /// of two polynomials, reduced modulo $(X^N + 1)$.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use concrete_core::math::polynomial::{Polynomial, PolynomialSize, MonomialDegree};
+    /// let lhs = Polynomial::from_container(vec![4_u8, 5, 0]);
+    /// let rhs = Polynomial::from_container(vec![7_u8, 9, 0]);
+    /// let mut res = Polynomial::allocate(0 as u8, PolynomialSize(3));
+    /// res.fill_with_wrapping_schoolbook(&lhs, &rhs);
+    /// assert_eq!(*res.get_monomial(MonomialDegree(0)).get_coefficient(), 28 as u8);
+    /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 71 as u8);
+    /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 45 as u8);
+    /// ```
+    pub fn fill_with_wrapping_schoolbook<Coef, LhsCont, RhsCont>(
         &mut self,
         lhs: &Polynomial<LhsCont>,
         rhs: &Polynomial<RhsCont>,
