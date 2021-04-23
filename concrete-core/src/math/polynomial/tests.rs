@@ -23,8 +23,8 @@ fn test_multiply_divide_unit_monomial<T: UnsignedTorus>() {
     r %= polynomial_size;
 
     // multiply by X^r and then divides by X^r
-    poly.update_with_wrapping_monic_monomial_mul(MonomialDegree(r));
-    poly.update_with_wrapping_unit_monomial_div(MonomialDegree(r));
+    poly.update_with_monic_monomial_mul(MonomialDegree(r));
+    poly.update_with_monic_monomial_div(MonomialDegree(r));
 
     // test
     assert_eq!(&poly, &ground_truth);
@@ -34,15 +34,15 @@ fn test_multiply_divide_unit_monomial<T: UnsignedTorus>() {
     r_big = r_big % polynomial_size + 2048;
 
     // multiply by X^r_big and then divides by X^r_big
-    poly.update_with_wrapping_monic_monomial_mul(MonomialDegree(r_big));
-    poly.update_with_wrapping_unit_monomial_div(MonomialDegree(r_big));
+    poly.update_with_monic_monomial_mul(MonomialDegree(r_big));
+    poly.update_with_monic_monomial_div(MonomialDegree(r_big));
 
     // test
     assert_eq!(&poly, &ground_truth);
 
     // divides by X^r_big and then multiply by X^r_big
-    poly.update_with_wrapping_monic_monomial_mul(MonomialDegree(r_big));
-    poly.update_with_wrapping_unit_monomial_div(MonomialDegree(r_big));
+    poly.update_with_monic_monomial_mul(MonomialDegree(r_big));
+    poly.update_with_monic_monomial_div(MonomialDegree(r_big));
 
     // test
     assert_eq!(&poly, &ground_truth);
@@ -69,10 +69,10 @@ fn test_multiply_karatsuba<T: UnsignedTorus>() {
     let mut ka_mul = Polynomial::allocate(T::ZERO, polynomial_size);
 
     // compute the schoolbook
-    sb_mul.fill_with_wrapping_mul(&poly_1, &poly_2);
+    sb_mul.fill_with_mul_schoolbook(&poly_1, &poly_2);
 
     // compute the karatsuba
-    ka_mul.fill_with_karatsuba_mul(&poly_1, &poly_2);
+    ka_mul.fill_with_mul_karatsuba(&poly_1, &poly_2);
 
     // test
     assert_eq!(&sb_mul, &ka_mul);
@@ -93,7 +93,7 @@ pub fn test_multiply_karatsuba_u32() {
     test_multiply_karatsuba::<u32>()
 }
 
-// #[test]
-// pub fn test_multiply_karatsuba_u64() {
-//     test_multiply_karatsuba::<u64>()
-// }
+#[test]
+pub fn test_multiply_karatsuba_u64() {
+    test_multiply_karatsuba::<u64>()
+}

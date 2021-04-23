@@ -242,20 +242,19 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 71 as u8);
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 45 as u8);
     /// ```
-    pub fn fill_with_wrapping_mul<Coef, LhsCont, RhsCont>(
+    pub fn fill_with_mul<Coef, PolynomialCont>(
         &mut self,
-        lhs: &Polynomial<LhsCont>,
-        rhs: &Polynomial<RhsCont>,
+        polynomial_1: &Polynomial<PolynomialCont>,
+        polynomial_2: &Polynomial<PolynomialCont>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        Polynomial<LhsCont>: AsRefTensor<Element = Coef>,
-        Polynomial<RhsCont>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         if self.polynomial_size().0 < KARATUSBA_STOP {
-            self.fill_with_wrapping_schoolbook(lhs, rhs);
+            self.fill_with_mul_schoolbook(polynomial_1, polynomial_2);
         } else {
-            self.fill_with_karatsuba(lhs, rhs);
+            self.fill_with_mul_karatsuba(polynomial_1, polynomial_2);
         }
     }
 
@@ -274,21 +273,20 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 71 as u8);
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 45 as u8);
     /// ```
-    pub fn fill_with_wrapping_schoolbook<Coef, LhsCont, RhsCont>(
+    pub fn fill_with_mul_schoolbook<Coef, PolynomialCont>(
         &mut self,
-        lhs: &Polynomial<LhsCont>,
-        rhs: &Polynomial<RhsCont>,
+        polynomial_1: &Polynomial<PolynomialCont>,
+        polynomial_2: &Polynomial<PolynomialCont>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        Polynomial<LhsCont>: AsRefTensor<Element = Coef>,
-        Polynomial<RhsCont>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
-        ck_dim_eq!(self.polynomial_size() => lhs.polynomial_size(), rhs.polynomial_size());
+        ck_dim_eq!(self.polynomial_size() => polynomial_1.polynomial_size(), polynomial_2.polynomial_size());
         self.coefficient_iter_mut().for_each(|a| *a = Coef::ZERO);
-        let degree = lhs.polynomial_size().0 - 1;
-        for lhsi in lhs.monomial_iter() {
-            for rhsi in rhs.monomial_iter() {
+        let degree = polynomial_1.polynomial_size().0 - 1;
+        for lhsi in polynomial_1.monomial_iter() {
+            for rhsi in polynomial_2.monomial_iter() {
                 let target_degree = lhsi.degree().0 + rhsi.degree().0;
                 if target_degree <= degree {
                     let element = self.as_mut_tensor().get_element_mut(target_degree);
@@ -320,14 +318,13 @@ impl<Cont> Polynomial<Cont> {
     /// res_mul.fill_with_wrapping_mul(&lhs, &rhs);
     /// assert_eq!(res_kara,res_mul);
     /// ```
-    pub fn fill_with_karatsuba<Coef, LhsCont, RhsCont>(
+    pub fn fill_with_mul_karatsuba<Coef, PolynomialCont>(
         &mut self,
-        p: &Polynomial<LhsCont>,
-        q: &Polynomial<RhsCont>,
+        p: &Polynomial<PolynomialCont>,
+        q: &Polynomial<PolynomialCont>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        Polynomial<LhsCont>: AsRefTensor<Element = Coef>,
-        Polynomial<RhsCont>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         ck_dim_eq!(self.polynomial_size() => p.polynomial_size(), q.polynomial_size());
@@ -347,12 +344,12 @@ impl<Cont> Polynomial<Cont> {
         let top = (poly_size / 2)..poly_size;
 
         // rec
-        induction_karatsuba(
+        rec_mul_karatsuba(
             &mut a0.get_sub_mut(..),
             &p.as_tensor().get_sub(bottom.clone()),
             &q.as_tensor().get_sub(bottom.clone()),
         );
-        induction_karatsuba(
+        rec_mul_karatsuba(
             &mut a1.get_sub_mut(..),
             &p.as_tensor().get_sub(top.clone()),
             &q.as_tensor().get_sub(top.clone()),
@@ -365,7 +362,7 @@ impl<Cont> Polynomial<Cont> {
             &q.as_tensor().get_sub(bottom.clone()),
             &q.as_tensor().get_sub(top.clone()),
         );
-        induction_karatsuba(
+        rec_mul_karatsuba(
             &mut a2.get_sub_mut(..),
             &input_a2_p.get_sub(..),
             &input_a2_q.get_sub(..),
@@ -391,41 +388,6 @@ impl<Cont> Polynomial<Cont> {
         self.as_mut_tensor()
             .get_sub_mut(top.clone())
             .update_with_wrapping_sub(&a1.get_sub(bottom.clone()));
-    }
-
-    /// Fills the current polynomial with the result of the product between an integer polynomial
-    /// and binary one, reduced modulo $(X^N + 1)$.
-    ///
-    /// # Example:
-    ///
-    /// ```
-    /// use concrete_core::math::polynomial::{Polynomial, PolynomialSize, MonomialDegree};
-    /// let poly = Polynomial::from_container(vec![1_u8, 2, 3]);
-    /// let bin_poly = Polynomial::from_container(vec![false, true, true]);
-    /// let mut res = Polynomial::allocate(133 as u8, PolynomialSize(3));
-    /// res.fill_with_wrapping_binary_mul(&poly, &bin_poly);
-    /// dbg!(&res);
-    /// assert_eq!(*res.get_monomial(MonomialDegree(0)).get_coefficient(), 251 as u8);
-    /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 254 as u8);
-    /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 3 as u8);
-    /// ```
-    pub fn fill_with_wrapping_binary_mul<Coef, PolyCont, BinCont>(
-        &mut self,
-        poly: &Polynomial<PolyCont>,
-        bin_poly: &Polynomial<BinCont>,
-    ) where
-        Self: AsMutTensor<Element = Coef>,
-        Polynomial<PolyCont>: AsRefTensor<Element = Coef>,
-        Polynomial<BinCont>: AsRefTensor<Element = bool>,
-        Coef: UnsignedInteger,
-    {
-        ck_dim_eq!(
-            self.polynomial_size() =>
-            poly.polynomial_size(),
-            bin_poly.polynomial_size()
-        );
-        self.coefficient_iter_mut().for_each(|a| *a = Coef::ZERO);
-        self.update_with_wrapping_add_binary_mul(poly, bin_poly)
     }
 
     /// Adds the sum of the element-wise product between a list of integer polynomial, and a
@@ -455,20 +417,28 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*output.get_monomial(MonomialDegree(1)).get_coefficient(), 96);
     /// assert_eq!(*output.get_monomial(MonomialDegree(2)).get_coefficient(), 120);
     /// ```
-    pub fn update_with_wrapping_add_binary_multisum<Coef, InCont, BinCont>(
+    pub fn update_with_add_multisum<Coef, InCont>(
         &mut self,
-        coef_list: &PolynomialList<InCont>,
-        bin_list: &PolynomialList<BinCont>,
+        polynomial_list_1: &PolynomialList<InCont>,
+        polynomial_list_2: &PolynomialList<InCont>,
     ) where
         Self: AsMutTensor<Element = Coef>,
         PolynomialList<InCont>: AsRefTensor<Element = Coef>,
-        PolynomialList<BinCont>: AsRefTensor<Element = bool>,
-        for<'a> Polynomial<&'a [bool]>: AsRefTensor<Element = bool>,
         for<'a> Polynomial<&'a [Coef]>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
-        for (poly, bin_poly) in coef_list.polynomial_iter().zip(bin_list.polynomial_iter()) {
-            self.update_with_wrapping_add_binary_mul(&poly, &bin_poly);
+        for (polynomial_1, polynomial_2) in polynomial_list_1
+            .polynomial_iter()
+            .zip(polynomial_list_2.polynomial_iter())
+        {
+            // allocation for the result of the multiplication
+            let mut tmp = Polynomial::allocate(Coef::ZERO, self.polynomial_size());
+
+            // multiplication
+            tmp.fill_with_mul(&polynomial_1, &polynomial_2);
+
+            // add to self
+            self.update_with_add(&tmp);
         }
     }
 
@@ -499,20 +469,28 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*output.get_monomial(MonomialDegree(1)).get_coefficient(), 148);
     /// assert_eq!(*output.get_monomial(MonomialDegree(2)).get_coefficient(), 124);
     /// ```
-    pub fn update_with_wrapping_sub_binary_multisum<Coef, InCont, BinCont>(
+    pub fn update_with_sub_multisum<Coef, InCont>(
         &mut self,
-        coef_list: &PolynomialList<InCont>,
-        bin_list: &PolynomialList<BinCont>,
+        polynomial_list_1: &PolynomialList<InCont>,
+        polynomial_list_2: &PolynomialList<InCont>,
     ) where
         Self: AsMutTensor<Element = Coef>,
         PolynomialList<InCont>: AsRefTensor<Element = Coef>,
-        PolynomialList<BinCont>: AsRefTensor<Element = bool>,
-        for<'a> Polynomial<&'a [bool]>: AsRefTensor<Element = bool>,
         for<'a> Polynomial<&'a [Coef]>: AsRefTensor<Element = Coef>,
-        Coef: UnsignedInteger + CastFrom<bool>,
+        Coef: UnsignedInteger,
     {
-        for (poly, bin_poly) in coef_list.polynomial_iter().zip(bin_list.polynomial_iter()) {
-            self.update_with_wrapping_sub_binary_mul(&poly, &bin_poly);
+        for (polynomial_1, polynomial_2) in polynomial_list_1
+            .polynomial_iter()
+            .zip(polynomial_list_2.polynomial_iter())
+        {
+            // allocation for the result of the multiplication
+            let mut tmp = Polynomial::allocate(Coef::ZERO, self.polynomial_size());
+
+            // multiplication
+            tmp.fill_with_mul(&polynomial_1, &polynomial_2);
+
+            // add to self
+            self.update_with_sub(&tmp);
         }
     }
     /// Adds the result of the product between a integer polynomial and a binary one, reduced
@@ -530,43 +508,29 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 254);
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 0);
     /// ```
-    pub fn update_with_wrapping_add_binary_mul<Coef, PolyCont, BinCont>(
+    pub fn update_with_add_mul<Coef, PolyCont>(
         &mut self,
-        polynomial: &Polynomial<PolyCont>,
-        bin_polynomial: &Polynomial<BinCont>,
+        polynomial_1: &Polynomial<PolyCont>,
+        polynomial_2: &Polynomial<PolyCont>,
     ) where
         Self: AsMutTensor<Element = Coef>,
         Polynomial<PolyCont>: AsRefTensor<Element = Coef>,
-        Polynomial<BinCont>: AsRefTensor<Element = bool>,
-        Coef: UnsignedInteger + CastFrom<bool>,
+        Coef: UnsignedInteger,
     {
         ck_dim_eq!(
             self.polynomial_size() =>
-            polynomial.polynomial_size(),
-            bin_polynomial.polynomial_size()
+            polynomial_1.polynomial_size(),
+            polynomial_2.polynomial_size()
         );
-        let degree = polynomial.polynomial_size().0 - 1;
-        for lhsi in polynomial.monomial_iter() {
-            for rhsi in bin_polynomial.monomial_iter() {
-                let target_degree = lhsi.degree().0 + rhsi.degree().0;
-                let binary_bit = Coef::cast_from(*rhsi.get_coefficient());
-                if target_degree <= degree {
-                    let update = self
-                        .as_tensor()
-                        .get_element(target_degree)
-                        .wrapping_add(*lhsi.get_coefficient() * binary_bit);
-                    *self.as_mut_tensor().get_element_mut(target_degree) = update;
-                } else {
-                    let update = self
-                        .as_tensor()
-                        .get_element(target_degree % (degree + 1))
-                        .wrapping_sub(*lhsi.get_coefficient() * binary_bit);
-                    *self
-                        .as_mut_tensor()
-                        .get_element_mut(target_degree % (degree + 1)) = update;
-                }
-            }
-        }
+
+        // allocation for the result of the multiplication
+        let mut tmp = Polynomial::allocate(Coef::ZERO, self.polynomial_size());
+
+        // multiplication
+        tmp.fill_with_mul(polynomial_1, polynomial_2);
+
+        // add to self
+        self.update_with_add(&tmp);
     }
 
     /// Subtracts the result of the product between an integer polynomial and a binary one, reduced
@@ -584,45 +548,29 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 1);
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 254);
     /// ```
-    pub fn update_with_wrapping_sub_binary_mul<Coef, PolyCont, BinCont>(
+    pub fn update_with_sub_mul<Coef, PolyCont>(
         &mut self,
-        polynomial: &Polynomial<PolyCont>,
-        bin_polynomial: &Polynomial<BinCont>,
+        polynomial_1: &Polynomial<PolyCont>,
+        polynomial_2: &Polynomial<PolyCont>,
     ) where
         Self: AsMutTensor<Element = Coef>,
         Polynomial<PolyCont>: AsRefTensor<Element = Coef>,
-        Polynomial<BinCont>: AsRefTensor<Element = bool>,
-        Coef: UnsignedInteger + CastFrom<bool>,
+        Coef: UnsignedInteger,
     {
         ck_dim_eq!(
             self.polynomial_size() =>
-            polynomial.polynomial_size(),
-            bin_polynomial.polynomial_size()
+            polynomial_1.polynomial_size(),
+            polynomial_2.polynomial_size()
         );
-        let degree = polynomial.polynomial_size().0 - 1;
-        for lhsi in polynomial.monomial_iter() {
-            for rhsi in bin_polynomial.monomial_iter() {
-                let target_degree = lhsi.degree().0 + rhsi.degree().0;
-                let binary_bit = Coef::cast_from(*rhsi.get_coefficient());
-                if target_degree <= degree {
-                    let update = self
-                        .as_tensor()
-                        .get_element(target_degree)
-                        .wrapping_sub(*lhsi.get_coefficient() * binary_bit);
-                    *self.as_mut_tensor().get_element_mut(target_degree) = update;
-                } else {
-                    let update = self
-                        .as_tensor()
-                        .get_element(target_degree % (degree + 1))
-                        .wrapping_add(*lhsi.get_coefficient() * binary_bit);
-                    *self
-                        .as_mut_tensor()
-                        .as_mut_slice()
-                        .get_mut(target_degree % (degree + 1))
-                        .unwrap() = update;
-                }
-            }
-        }
+
+        // allocation for the result of the multiplication
+        let mut tmp = Polynomial::allocate(Coef::ZERO, self.polynomial_size());
+
+        // multiplication
+        tmp.fill_with_mul(polynomial_1, polynomial_2);
+
+        // add to self
+        self.update_with_sub(&tmp);
     }
 
     /// Adds a integer polynomial to another one.
@@ -638,7 +586,7 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*first.get_monomial(MonomialDegree(1)).get_coefficient(), 1);
     /// assert_eq!(*first.get_monomial(MonomialDegree(2)).get_coefficient(), 2);
     /// ```
-    pub fn update_with_wrapping_add<Coef, OtherCont>(&mut self, other: &Polynomial<OtherCont>)
+    pub fn update_with_add<Coef, OtherCont>(&mut self, other: &Polynomial<OtherCont>)
     where
         Self: AsMutTensor<Element = Coef>,
         Polynomial<OtherCont>: AsRefTensor<Element = Coef>,
@@ -665,7 +613,7 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*first.get_monomial(MonomialDegree(1)).get_coefficient(), 253);
     /// assert_eq!(*first.get_monomial(MonomialDegree(2)).get_coefficient(), 253);
     /// ```
-    pub fn update_with_wrapping_sub<Coef, OtherCont>(&mut self, other: &Polynomial<OtherCont>)
+    pub fn update_with_sub<Coef, OtherCont>(&mut self, other: &Polynomial<OtherCont>)
     where
         Self: AsMutTensor<Element = Coef>,
         Polynomial<OtherCont>: AsRefTensor<Element = Coef>,
@@ -692,7 +640,7 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*poly.get_monomial(MonomialDegree(1)).get_coefficient(), 253);
     /// assert_eq!(*poly.get_monomial(MonomialDegree(2)).get_coefficient(), 1);
     /// ```
-    pub fn update_with_wrapping_monic_monomial_mul<Coef>(&mut self, monomial_degree: MonomialDegree)
+    pub fn update_with_monic_monomial_mul<Coef>(&mut self, monomial_degree: MonomialDegree)
     where
         Self: AsMutTensor<Element = Coef>,
         Coef: UnsignedInteger,
@@ -728,7 +676,7 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*poly.get_monomial(MonomialDegree(1)).get_coefficient(), 255);
     /// assert_eq!(*poly.get_monomial(MonomialDegree(2)).get_coefficient(), 254);
     /// ```
-    pub fn update_with_wrapping_unit_monomial_div<Coef>(&mut self, monomial_degree: MonomialDegree)
+    pub fn update_with_monic_monomial_div<Coef>(&mut self, monomial_degree: MonomialDegree)
     where
         Self: AsMutTensor<Element = Coef>,
         Coef: UnsignedInteger,
@@ -766,17 +714,15 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*poly.get_monomial(MonomialDegree(1)).get_coefficient(), 15);
     /// assert_eq!(*poly.get_monomial(MonomialDegree(2)).get_coefficient(), 18);
     /// ```
-    pub fn update_with_wrapping_add_several<Coef, InCont>(
-        &mut self,
-        coef_list: &PolynomialList<InCont>,
-    ) where
+    pub fn update_with_add_several<Coef, InCont>(&mut self, coef_list: &PolynomialList<InCont>)
+    where
         Self: AsMutTensor<Element = Coef>,
         PolynomialList<InCont>: AsRefTensor<Element = Coef>,
         for<'a> Polynomial<&'a [Coef]>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         for poly in coef_list.polynomial_iter() {
-            self.update_with_wrapping_add(&poly);
+            self.update_with_add(&poly);
         }
     }
 
@@ -794,27 +740,22 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*poly.get_monomial(MonomialDegree(1)).get_coefficient(), 4294967285);
     /// assert_eq!(*poly.get_monomial(MonomialDegree(2)).get_coefficient(), 4294967284);
     /// ```
-    pub fn update_with_wrapping_sub_several<Coef, InCont>(
-        &mut self,
-        coef_list: &PolynomialList<InCont>,
-    ) where
+    pub fn update_with_sub_several<Coef, InCont>(&mut self, coef_list: &PolynomialList<InCont>)
+    where
         Self: AsMutTensor<Element = Coef>,
         PolynomialList<InCont>: AsRefTensor<Element = Coef>,
         for<'a> Polynomial<&'a [Coef]>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         for poly in coef_list.polynomial_iter() {
-            self.update_with_wrapping_sub(&poly);
+            self.update_with_sub(&poly);
         }
     }
 }
 
 /// function used to compute the induction for the karatsuba algorithm
-fn induction_karatsuba<Coef>(
-    res: &mut Tensor<&mut [Coef]>,
-    p: &Tensor<&[Coef]>,
-    q: &Tensor<&[Coef]>,
-) where
+fn rec_mul_karatsuba<Coef>(res: &mut Tensor<&mut [Coef]>, p: &Tensor<&[Coef]>, q: &Tensor<&[Coef]>)
+where
     Coef: UnsignedInteger,
 {
     if p.len() == KARATUSBA_STOP {
@@ -841,12 +782,12 @@ fn induction_karatsuba<Coef>(
         let top = (poly_size / 4)..(poly_size / 2);
 
         // rec
-        induction_karatsuba(
+        rec_mul_karatsuba(
             &mut a0.get_sub_mut(..),
             &p.get_sub(bottom.clone()),
             &q.get_sub(bottom.clone()),
         );
-        induction_karatsuba(
+        rec_mul_karatsuba(
             &mut a1.get_sub_mut(..),
             &p.get_sub(top.clone()),
             &q.get_sub(top.clone()),
@@ -857,7 +798,7 @@ fn induction_karatsuba<Coef>(
         input_a2_q
             .as_mut_tensor()
             .fill_with_wrapping_add(&q.get_sub(bottom.clone()), &q.get_sub(top.clone()));
-        induction_karatsuba(
+        rec_mul_karatsuba(
             &mut a2.get_sub_mut(..),
             &input_a2_p.get_sub(..),
             &input_a2_q.get_sub(..),
