@@ -23,7 +23,7 @@ pub struct GlweSecretKey<Container> {
 
 tensor_traits!(GlweSecretKey);
 
-impl GlweSecretKey<Vec<bool>> {
+impl<Scalar> GlweSecretKey<Vec<Scalar>> {
     /// Allocates a container for a new key, and fill it with random values.
     ///
     /// # Example
@@ -60,7 +60,7 @@ impl GlweSecretKey<Vec<bool>> {
     /// let lwe_secret_key = glwe_secret_key.into_lwe_secret_key();
     /// assert_eq!(lwe_secret_key.key_size(), LweDimension(20))
     /// ```
-    pub fn into_lwe_secret_key(self) -> LweSecretKey<Vec<bool>> {
+    pub fn into_lwe_secret_key(self) -> LweSecretKey<Vec<Scalar>> {
         LweSecretKey::from_container(self.tensor.into_container())
     }
 }
@@ -214,14 +214,14 @@ impl<Cont> GlweSecretKey<Cont> {
     ///     assert!(dist < 400, "dist: {:?}", dist);
     /// }
     /// ```
-    pub fn encrypt_glwe<OutputCont, EncCont, Scalar>(
+    pub fn encrypt_glwe<Scalar, EncCont>(
         &self,
-        encrypted: &mut GlweCiphertext<OutputCont>,
+        encrypted: &mut GlweCiphertext<Cont>,
         encoded: &PlaintextList<EncCont>,
         noise_parameter: impl DispersionParameter,
     ) where
-        Self: AsRefTensor<Element = bool>,
-        GlweCiphertext<OutputCont>: AsMutTensor<Element = Scalar>,
+        Self: AsRefTensor<Element = Scalar>,
+        GlweCiphertext<Cont>: AsMutTensor<Element = Scalar>,
         PlaintextList<EncCont>: AsRefTensor<Element = Scalar>,
         Scalar: UnsignedTorus,
     {
@@ -229,12 +229,9 @@ impl<Cont> GlweSecretKey<Cont> {
         random::fill_with_random_gaussian(&mut body, 0., noise_parameter.get_standard_dev());
         random::fill_with_random_uniform(&mut masks);
         body.as_mut_polynomial()
-            .update_with_wrapping_add_binary_multisum(
-                &masks.as_mut_polynomial_list(),
-                &self.as_polynomial_list(),
-            );
+            .update_with_add_multisum(&masks.as_mut_polynomial_list(), &self.as_polynomial_list());
         body.as_mut_polynomial()
-            .update_with_wrapping_add(&encoded.as_polynomial());
+            .update_with_add(&encoded.as_polynomial());
     }
 
     /// Encrypts a zero plaintext into a GLWE ciphertext.
@@ -269,7 +266,7 @@ impl<Cont> GlweSecretKey<Cont> {
         encrypted: &mut GlweCiphertext<OutputCont>,
         noise_parameters: impl DispersionParameter,
     ) where
-        Self: AsRefTensor<Element = bool>,
+        Self: AsRefTensor<Element = Scalar>,
         GlweCiphertext<OutputCont>: AsMutTensor<Element = Scalar>,
         Scalar: UnsignedTorus,
     {
@@ -277,10 +274,7 @@ impl<Cont> GlweSecretKey<Cont> {
         random::fill_with_random_gaussian(&mut body, 0., noise_parameters.get_standard_dev());
         random::fill_with_random_uniform(&mut masks);
         body.as_mut_polynomial()
-            .update_with_wrapping_add_binary_multisum(
-                &masks.as_mut_polynomial_list(),
-                &self.as_polynomial_list(),
-            );
+            .update_with_add_multisum(&masks.as_mut_polynomial_list(), &self.as_polynomial_list());
     }
 
     /// Encrypts a list of GLWE ciphertexts.
@@ -316,17 +310,18 @@ impl<Cont> GlweSecretKey<Cont> {
     ///     assert!(dist < 400, "dist: {:?}", dist);
     /// }
     /// ```
-    pub fn encrypt_glwe_list<CiphCont, EncCont, Scalar>(
+    pub fn encrypt_glwe_list<CiphCont, Scalar>(
         &self,
         encrypt: &mut GlweList<CiphCont>,
-        encoded: &PlaintextList<EncCont>,
+        encoded: &PlaintextList<Cont>,
         noise_parameters: impl DispersionParameter,
     ) where
-        Self: AsRefTensor<Element = bool>,
+        Self: AsRefTensor<Element = Scalar>,
         GlweList<CiphCont>: AsMutTensor<Element = Scalar>,
-        PlaintextList<EncCont>: AsRefTensor<Element = Scalar>,
+        PlaintextList<Cont>: AsRefTensor<Element = Scalar>,
         Scalar: UnsignedTorus,
         for<'a> PlaintextList<&'a [Scalar]>: AsRefTensor<Element = Scalar>,
+        for<'a> GlweCiphertext<&'a mut [Scalar]>: AsMutTensor<Element = Scalar>,
     {
         ck_dim_eq!(encrypt.ciphertext_count().0 * encrypt.polynomial_size().0 => encoded.count().0);
         ck_dim_eq!(encrypt.glwe_dimension().0 => self.key_size().0);
@@ -377,7 +372,7 @@ impl<Cont> GlweSecretKey<Cont> {
         encrypted: &mut GlweList<OutputCont>,
         noise_parameters: impl DispersionParameter,
     ) where
-        Self: AsRefTensor<Element = bool>,
+        Self: AsRefTensor<Element = Scalar>,
         GlweList<OutputCont>: AsMutTensor<Element = Scalar>,
         Scalar: UnsignedTorus + Add,
     {
@@ -394,7 +389,7 @@ impl<Cont> GlweSecretKey<Cont> {
         encoded: &mut PlaintextList<EncCont>,
         encrypted: &GlweCiphertext<CiphCont>,
     ) where
-        Self: AsRefTensor<Element = bool>,
+        Self: AsRefTensor<Element = Scalar>,
         PlaintextList<EncCont>: AsMutTensor<Element = Scalar>,
         GlweCiphertext<CiphCont>: AsRefTensor<Element = Scalar>,
         Scalar: UnsignedTorus + Add,
@@ -406,10 +401,7 @@ impl<Cont> GlweSecretKey<Cont> {
             .fill_with_one(body.as_tensor(), |a| *a);
         encoded
             .as_mut_polynomial()
-            .update_with_wrapping_sub_binary_multisum(
-                &masks.as_polynomial_list(),
-                &self.as_polynomial_list(),
-            );
+            .update_with_sub_multisum(&masks.as_polynomial_list(), &self.as_polynomial_list());
     }
 
     /// Decrypts a list of GLWE ciphertexts.
@@ -420,7 +412,7 @@ impl<Cont> GlweSecretKey<Cont> {
         encoded: &mut PlaintextList<EncCont>,
         encrypted: &GlweList<CiphCont>,
     ) where
-        Self: AsRefTensor<Element = bool>,
+        Self: AsRefTensor<Element = Scalar>,
         PlaintextList<EncCont>: AsMutTensor<Element = Scalar>,
         GlweList<CiphCont>: AsRefTensor<Element = Scalar>,
         Scalar: UnsignedTorus + Add,
@@ -468,7 +460,7 @@ impl<Cont> GlweSecretKey<Cont> {
         encoded: &Plaintext<Scalar>,
         noise_parameters: impl DispersionParameter,
     ) where
-        Self: AsRefTensor<Element = bool>,
+        Self: AsRefTensor<Element = Scalar>,
         GgswCiphertext<OutputCont>: AsMutTensor<Element = Scalar>,
         OutputCont: AsMutSlice<Element = Scalar>,
         Scalar: UnsignedTorus,
@@ -529,7 +521,7 @@ impl<Cont> GlweSecretKey<Cont> {
         encoded: &Plaintext<Scalar>,
         noise_parameters: impl DispersionParameter,
     ) where
-        Self: AsRefTensor<Element = bool>,
+        Self: AsRefTensor<Element = Scalar>,
         GgswCiphertext<OutputCont>: AsMutTensor<Element = Scalar>,
         OutputCont: AsMutSlice<Element = Scalar>,
         Scalar: UnsignedTorus,

@@ -1,16 +1,31 @@
+use crate::crypto::UnsignedTorus;
 use crate::math::tensor::{AsMutTensor, Tensor};
+use crate::numeric::CastFrom;
 
 use super::*;
 
 /// A distribution type representing uniform sampling for boolean type.
 pub struct UniformBoolean;
 
-impl RandomGenerable<UniformBoolean> for bool {
+// impl RandomGenerable<UniformBoolean> for bool {
+//     #[allow(unused)]
+//     fn sample(distribution: UniformBoolean) -> Self {
+//         use concrete_csprng::RandomGenerator;
+//         let mut gen = RandomGenerator::new(None, None);
+//         gen.generate_next() & 1 == 1
+//     }
+// }
+
+impl<Scalar> RandomGenerable<UniformBoolean> for Scalar {
     #[allow(unused)]
-    fn sample(distribution: UniformBoolean) -> Self {
+    fn sample(distribution: UniformBoolean) -> Self
+    where
+        Scalar: UnsignedTorus,
+        Scalar: CastFrom<bool>,
+    {
         use concrete_csprng::RandomGenerator;
         let mut gen = RandomGenerator::new(None, None);
-        gen.generate_next() & 1 == 1
+        Scalar::cast_from(gen.generate_next() & 1 == 1)
     }
 }
 

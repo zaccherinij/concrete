@@ -219,7 +219,7 @@ impl<Cont> PolynomialList<Cont> {
         Coef: UnsignedInteger,
     {
         for mut poly in self.polynomial_iter_mut() {
-            poly.update_with_wrapping_monic_monomial_mul(monomial_degree);
+            poly.update_with_monic_monomial_mul(monomial_degree);
         }
     }
 
@@ -243,7 +243,7 @@ impl<Cont> PolynomialList<Cont> {
         Coef: UnsignedInteger,
     {
         for mut poly in self.polynomial_iter_mut() {
-            poly.update_with_wrapping_unit_monomial_div(monomial_degree);
+            poly.update_with_monic_monomial_div(monomial_degree);
         }
     }
 }

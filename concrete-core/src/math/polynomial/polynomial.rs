@@ -242,13 +242,14 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 71 as u8);
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 45 as u8);
     /// ```
-    pub fn fill_with_mul<Coef, PolynomialCont>(
+    pub fn fill_with_mul<Coef, PolynomialCont1, PolynomialCont2>(
         &mut self,
-        polynomial_1: &Polynomial<PolynomialCont>,
-        polynomial_2: &Polynomial<PolynomialCont>,
+        polynomial_1: &Polynomial<PolynomialCont1>,
+        polynomial_2: &Polynomial<PolynomialCont2>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        Polynomial<PolynomialCont>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont1>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont2>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         if self.polynomial_size().0 < KARATUSBA_STOP {
@@ -273,13 +274,14 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 71 as u8);
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 45 as u8);
     /// ```
-    pub fn fill_with_mul_schoolbook<Coef, PolynomialCont>(
+    pub fn fill_with_mul_schoolbook<Coef, PolynomialCont1, PolynomialCont2>(
         &mut self,
-        polynomial_1: &Polynomial<PolynomialCont>,
-        polynomial_2: &Polynomial<PolynomialCont>,
+        polynomial_1: &Polynomial<PolynomialCont1>,
+        polynomial_2: &Polynomial<PolynomialCont2>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        Polynomial<PolynomialCont>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont1>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont2>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         ck_dim_eq!(self.polynomial_size() => polynomial_1.polynomial_size(), polynomial_2.polynomial_size());
@@ -318,13 +320,14 @@ impl<Cont> Polynomial<Cont> {
     /// res_mul.fill_with_wrapping_mul(&lhs, &rhs);
     /// assert_eq!(res_kara,res_mul);
     /// ```
-    pub fn fill_with_mul_karatsuba<Coef, PolynomialCont>(
+    pub fn fill_with_mul_karatsuba<Coef, PolynomialCont1, PolynomialCont2>(
         &mut self,
-        p: &Polynomial<PolynomialCont>,
-        q: &Polynomial<PolynomialCont>,
+        p: &Polynomial<PolynomialCont1>,
+        q: &Polynomial<PolynomialCont2>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        Polynomial<PolynomialCont>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont1>: AsRefTensor<Element = Coef>,
+        Polynomial<PolynomialCont2>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         ck_dim_eq!(self.polynomial_size() => p.polynomial_size(), q.polynomial_size());
@@ -417,13 +420,14 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*output.get_monomial(MonomialDegree(1)).get_coefficient(), 96);
     /// assert_eq!(*output.get_monomial(MonomialDegree(2)).get_coefficient(), 120);
     /// ```
-    pub fn update_with_add_multisum<Coef, InCont>(
+    pub fn update_with_add_multisum<Coef, InCont1, InCont2>(
         &mut self,
-        polynomial_list_1: &PolynomialList<InCont>,
-        polynomial_list_2: &PolynomialList<InCont>,
+        polynomial_list_1: &PolynomialList<InCont1>,
+        polynomial_list_2: &PolynomialList<InCont2>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        PolynomialList<InCont>: AsRefTensor<Element = Coef>,
+        PolynomialList<InCont1>: AsRefTensor<Element = Coef>,
+        PolynomialList<InCont2>: AsRefTensor<Element = Coef>,
         for<'a> Polynomial<&'a [Coef]>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
@@ -469,13 +473,14 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*output.get_monomial(MonomialDegree(1)).get_coefficient(), 148);
     /// assert_eq!(*output.get_monomial(MonomialDegree(2)).get_coefficient(), 124);
     /// ```
-    pub fn update_with_sub_multisum<Coef, InCont>(
+    pub fn update_with_sub_multisum<Coef, InCont1, InCont2>(
         &mut self,
-        polynomial_list_1: &PolynomialList<InCont>,
-        polynomial_list_2: &PolynomialList<InCont>,
+        polynomial_list_1: &PolynomialList<InCont1>,
+        polynomial_list_2: &PolynomialList<InCont2>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        PolynomialList<InCont>: AsRefTensor<Element = Coef>,
+        PolynomialList<InCont1>: AsRefTensor<Element = Coef>,
+        PolynomialList<InCont2>: AsRefTensor<Element = Coef>,
         for<'a> Polynomial<&'a [Coef]>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
@@ -508,13 +513,14 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 254);
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 0);
     /// ```
-    pub fn update_with_add_mul<Coef, PolyCont>(
+    pub fn update_with_add_mul<Coef, PolyCont1, PolyCont2>(
         &mut self,
-        polynomial_1: &Polynomial<PolyCont>,
-        polynomial_2: &Polynomial<PolyCont>,
+        polynomial_1: &Polynomial<PolyCont1>,
+        polynomial_2: &Polynomial<PolyCont2>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        Polynomial<PolyCont>: AsRefTensor<Element = Coef>,
+        Polynomial<PolyCont1>: AsRefTensor<Element = Coef>,
+        Polynomial<PolyCont2>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         ck_dim_eq!(
@@ -548,13 +554,14 @@ impl<Cont> Polynomial<Cont> {
     /// assert_eq!(*res.get_monomial(MonomialDegree(1)).get_coefficient(), 1);
     /// assert_eq!(*res.get_monomial(MonomialDegree(2)).get_coefficient(), 254);
     /// ```
-    pub fn update_with_sub_mul<Coef, PolyCont>(
+    pub fn update_with_sub_mul<Coef, PolyCont1, PolyCont2>(
         &mut self,
-        polynomial_1: &Polynomial<PolyCont>,
-        polynomial_2: &Polynomial<PolyCont>,
+        polynomial_1: &Polynomial<PolyCont1>,
+        polynomial_2: &Polynomial<PolyCont2>,
     ) where
         Self: AsMutTensor<Element = Coef>,
-        Polynomial<PolyCont>: AsRefTensor<Element = Coef>,
+        Polynomial<PolyCont1>: AsRefTensor<Element = Coef>,
+        Polynomial<PolyCont2>: AsRefTensor<Element = Coef>,
         Coef: UnsignedInteger,
     {
         ck_dim_eq!(
