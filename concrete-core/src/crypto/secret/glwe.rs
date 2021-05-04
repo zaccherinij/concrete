@@ -214,14 +214,14 @@ impl<Cont> GlweSecretKey<Cont> {
     ///     assert!(dist < 400, "dist: {:?}", dist);
     /// }
     /// ```
-    pub fn encrypt_glwe<Scalar, EncCont>(
+    pub fn encrypt_glwe<Scalar, CiphCont, EncCont>(
         &self,
-        encrypted: &mut GlweCiphertext<Cont>,
+        encrypted: &mut GlweCiphertext<CiphCont>,
         encoded: &PlaintextList<EncCont>,
         noise_parameter: impl DispersionParameter,
     ) where
         Self: AsRefTensor<Element = Scalar>,
-        GlweCiphertext<Cont>: AsMutTensor<Element = Scalar>,
+        GlweCiphertext<CiphCont>: AsMutTensor<Element = Scalar>,
         PlaintextList<EncCont>: AsRefTensor<Element = Scalar>,
         Scalar: UnsignedTorus,
     {
@@ -310,18 +310,17 @@ impl<Cont> GlweSecretKey<Cont> {
     ///     assert!(dist < 400, "dist: {:?}", dist);
     /// }
     /// ```
-    pub fn encrypt_glwe_list<CiphCont, Scalar>(
+    pub fn encrypt_glwe_list<CiphCont, EncCont, Scalar>(
         &self,
         encrypt: &mut GlweList<CiphCont>,
-        encoded: &PlaintextList<Cont>,
+        encoded: &PlaintextList<EncCont>,
         noise_parameters: impl DispersionParameter,
     ) where
         Self: AsRefTensor<Element = Scalar>,
         GlweList<CiphCont>: AsMutTensor<Element = Scalar>,
-        PlaintextList<Cont>: AsRefTensor<Element = Scalar>,
+        PlaintextList<EncCont>: AsRefTensor<Element = Scalar>,
         Scalar: UnsignedTorus,
         for<'a> PlaintextList<&'a [Scalar]>: AsRefTensor<Element = Scalar>,
-        for<'a> GlweCiphertext<&'a mut [Scalar]>: AsMutTensor<Element = Scalar>,
     {
         ck_dim_eq!(encrypt.ciphertext_count().0 * encrypt.polynomial_size().0 => encoded.count().0);
         ck_dim_eq!(encrypt.glwe_dimension().0 => self.key_size().0);

@@ -335,8 +335,8 @@ impl<Cont> BootstrapKey<Cont> {
         noise_parameters: impl DispersionParameter,
     ) where
         Self: AsMutTensor<Element = Scalar>,
-        LweSecretKey<LweCont>: AsRefTensor<Element = bool>,
-        GlweSecretKey<RlweCont>: AsRefTensor<Element = bool>,
+        LweSecretKey<LweCont>: AsRefTensor<Element = Scalar>,
+        GlweSecretKey<RlweCont>: AsRefTensor<Element = Scalar>,
         Scalar: UnsignedTorus,
     {
         ck_dim_eq!(self.key_size().0 => lwe_secret_key.key_size().0);
@@ -389,8 +389,8 @@ impl<Cont> BootstrapKey<Cont> {
         noise_parameters: impl DispersionParameter,
     ) where
         Self: AsMutTensor<Element = Scalar>,
-        LweSecretKey<LweCont>: AsRefTensor<Element = bool>,
-        GlweSecretKey<RlweCont>: AsRefTensor<Element = bool>,
+        LweSecretKey<LweCont>: AsRefTensor<Element = Scalar>,
+        GlweSecretKey<RlweCont>: AsRefTensor<Element = Scalar>,
         Scalar: UnsignedTorus,
     {
         ck_dim_eq!(self.key_size().0 => lwe_secret_key.key_size().0);
