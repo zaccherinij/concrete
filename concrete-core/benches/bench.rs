@@ -25,6 +25,7 @@ use concrete_core::numeric::{CastFrom, CastInto, Numeric};
 
 mod bootstrap;
 mod keyswitch;
+mod lwe_encrypt;
 mod mac;
 mod multisum;
 mod random;
@@ -47,6 +48,7 @@ criterion_group!(
     rlwe_encrypt::bench_32,
     rlwe_encrypt::bench_64
 );
+criterion_group!(lwe_encrypt_b, lwe_encrypt::bench_32, lwe_encrypt::bench_64);
 
 criterion_main!(
     bootstrap_b,
@@ -54,5 +56,6 @@ criterion_main!(
     random_b,
     multisum_b,
     mac_b,
-    rlwe_encrypt_b
+    rlwe_encrypt_b,
+    lwe_encrypt_b,
 );
