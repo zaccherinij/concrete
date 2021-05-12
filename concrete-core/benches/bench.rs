@@ -24,6 +24,7 @@ use concrete_core::math::tensor::{
 use concrete_core::numeric::{CastFrom, CastInto, Numeric};
 
 mod bootstrap;
+mod bsk_generation;
 mod keyswitch;
 mod lwe_encrypt;
 mod mac;
@@ -32,6 +33,11 @@ mod random;
 mod rlwe_encrypt;
 
 criterion_group!(bootstrap_b, bootstrap::bench_32, bootstrap::bench_64);
+criterion_group!(
+    bsk_generation_b,
+    bsk_generation::bench_32,
+    bsk_generation::bench_64
+);
 criterion_group!(keyswitch_b, keyswitch::bench_32, keyswitch::bench_64);
 criterion_group!(
     random_b,
@@ -52,6 +58,7 @@ criterion_group!(lwe_encrypt_b, lwe_encrypt::bench_32, lwe_encrypt::bench_64);
 
 criterion_main!(
     bootstrap_b,
+    bsk_generation_b,
     keyswitch_b,
     random_b,
     multisum_b,
