@@ -10,6 +10,9 @@ use crate::{ck_dim_div, tensor_traits};
 
 use super::GgswLevelMatrix;
 
+#[cfg(feature = "multithread")]
+use rayon::{iter::IndexedParallelIterator, prelude::*};
+
 /// A GGSW ciphertext.
 pub struct GgswCiphertext<Cont> {
     tensor: Tensor<Cont>,
@@ -352,6 +355,30 @@ impl<Cont> GgswCiphertext<Cont> {
         let rlwe_size = self.rlwe_size;
         self.as_mut_tensor()
             .subtensor_iter_mut(chunks_size)
+            .enumerate()
+            .map(move |(index, tensor)| {
+                GgswLevelMatrix::from_container(
+                    tensor.into_container(),
+                    poly_size,
+                    rlwe_size,
+                    DecompositionLevel(index),
+                )
+            })
+    }
+
+    #[cfg(feature = "multithread")]
+    pub fn par_level_matrix_iter_mut(
+        &mut self,
+    ) -> impl IndexedParallelIterator<Item = GgswLevelMatrix<&mut [<Self as AsRefTensor>::Element]>>
+    where
+        Self: AsMutTensor,
+        <Self as AsMutTensor>::Element: Sync + Send,
+    {
+        let chunks_size = self.poly_size.0 * self.rlwe_size.0 * self.rlwe_size.0;
+        let poly_size = self.poly_size;
+        let rlwe_size = self.rlwe_size;
+        self.as_mut_tensor()
+            .par_subtensor_iter_mut(chunks_size)
             .enumerate()
             .map(move |(index, tensor)| {
                 GgswLevelMatrix::from_container(

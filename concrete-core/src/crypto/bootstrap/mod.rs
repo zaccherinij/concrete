@@ -16,6 +16,9 @@ use super::secret::{GlweSecretKey, LweSecretKey};
 use super::GlweSize;
 use crate::math::random::EncryptionRng;
 
+#[cfg(feature = "multithread")]
+use rayon::{iter::IndexedParallelIterator, prelude::*};
+
 mod serde;
 
 /// A bootstrapping key
@@ -368,6 +371,49 @@ impl<Cont> BootstrapKey<Cont> {
         }
     }
 
+    pub fn fill_with_new_key_multi<LweCont, RlweCont, Scalar>(
+        &mut self,
+        lwe_secret_key: &LweSecretKey<LweCont>,
+        glwe_secret_key: &GlweSecretKey<RlweCont>,
+        noise_parameters: impl DispersionParameter + Sync + Send,
+        generator: &mut EncryptionRng,
+    ) where
+        Self: AsMutTensor<Element = Scalar>,
+        LweSecretKey<LweCont>: AsRefTensor<Element = bool>,
+        GlweSecretKey<RlweCont>: AsRefTensor<Element = bool>,
+        Scalar: UnsignedTorus + Sync + Send,
+        RlweCont: Sync,
+    {
+        ck_dim_eq!(self.key_size().0 => lwe_secret_key.key_size().0);
+        self.as_mut_tensor()
+            .fill_with_element(<Scalar as Numeric>::ZERO);
+        let mut gen_iter = generator
+            .fork_bsk_to_ggsw::<Scalar>(
+                lwe_secret_key.key_size(),
+                self.decomp_level,
+                glwe_secret_key.key_size().to_glwe_size(),
+                self.poly_size,
+            )
+            .expect("Failed to fork generator")
+            .collect::<Vec<_>>();
+        self.par_ggsw_iter_mut()
+            .zip(lwe_secret_key.as_tensor().par_iter())
+            .zip(gen_iter.par_iter_mut())
+            .for_each(|((mut rgsw, sk_scalar), generator)| {
+                let encoded = if *sk_scalar {
+                    Plaintext(Scalar::ONE)
+                } else {
+                    Plaintext(Scalar::ZERO)
+                };
+                glwe_secret_key.encrypt_constant_ggsw_multi(
+                    &mut rgsw,
+                    &encoded,
+                    noise_parameters.clone(),
+                    generator,
+                );
+            });
+    }
+
     /// Generate a new bootstrap key from the input parameters, and fills the current container
     /// with it.
     ///
@@ -514,6 +560,32 @@ impl<Cont> BootstrapKey<Cont> {
         let base_log = self.decomp_base_log;
         self.as_mut_tensor()
             .subtensor_iter_mut(chunks_size)
+            .map(move |tensor| {
+                GgswCiphertext::from_container(
+                    tensor.into_container(),
+                    rlwe_size,
+                    poly_size,
+                    base_log,
+                )
+            })
+    }
+
+    #[cfg(feature = "multithread")]
+    pub fn par_ggsw_iter_mut(
+        &mut self,
+    ) -> impl IndexedParallelIterator<Item = GgswCiphertext<&mut [<Self as AsRefTensor>::Element]>>
+    where
+        Self: AsMutTensor,
+        <Self as AsRefTensor>::Element: Sync + Send,
+    {
+        let chunks_size =
+            self.rlwe_size.0 * self.rlwe_size.0 * self.poly_size.0 * self.decomp_level.0;
+        let rlwe_size = self.rlwe_size;
+        let poly_size = self.poly_size;
+        let base_log = self.decomp_base_log;
+
+        self.as_mut_tensor()
+            .par_subtensor_iter_mut(chunks_size)
             .map(move |tensor| {
                 GgswCiphertext::from_container(
                     tensor.into_container(),

@@ -14,6 +14,9 @@ use crate::math::tensor::{AsMutSlice, AsMutTensor, AsRefSlice, AsRefTensor, Tens
 use crate::numeric::Numeric;
 use crate::{ck_dim_div, ck_dim_eq, tensor_traits};
 
+#[cfg(feature = "multithread")]
+use rayon::{iter::IndexedParallelIterator, prelude::*};
+
 /// A GLWE secret key
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct GlweSecretKey<Container> {
@@ -551,6 +554,56 @@ impl<Cont> GlweSecretKey<Cont> {
                 *first_coef = first_coef.wrapping_add(decomposition);
             }
         }
+    }
+
+    #[cfg(feature = "multithread")]
+    pub fn encrypt_constant_ggsw_multi<OutputCont, Scalar>(
+        &self,
+        encrypted: &mut GgswCiphertext<OutputCont>,
+        encoded: &Plaintext<Scalar>,
+        noise_parameters: impl DispersionParameter + Send + Sync,
+        generator: &mut EncryptionRng,
+    ) where
+        Self: AsRefTensor<Element = bool>,
+        GgswCiphertext<OutputCont>: AsMutTensor<Element = Scalar>,
+        OutputCont: AsMutSlice<Element = Scalar>,
+        Scalar: UnsignedTorus + Send + Sync,
+        Cont: Sync,
+    {
+        ck_dim_eq!(self.polynomial_size() => encrypted.polynomial_size());
+        ck_dim_eq!(self.key_size() => encrypted.glwe_size().to_glwe_dimension());
+        let mut generators = generator
+            .fork_ggsw_to_ggsw_levels::<Scalar>(
+                encrypted.decomposition_level_count(),
+                self.key_size().to_glwe_size(),
+                self.poly_size,
+            )
+            .expect("Failed to split generator into ggsw levels")
+            .collect::<Vec<_>>();
+        let base_log = encrypted.decomposition_base_log();
+        encrypted
+            .par_level_matrix_iter_mut()
+            .zip(generators.par_iter_mut())
+            .for_each(move |(mut matrix, generator)| {
+                let decomposition = encoded.0
+                    * (Scalar::ONE
+                        << (<Scalar as Numeric>::BITS
+                            - (base_log.0 * (matrix.decomposition_level().0 + 1))));
+                // We iterate over the rowe of the level matrix
+                for (index, row) in matrix.row_iter_mut().enumerate() {
+                    let mut rlwe_ct = row.into_rlwe();
+                    // We issue a fresh  encryption of zero
+                    self.encrypt_zero_glwe(&mut rlwe_ct, noise_parameters.clone(), generator);
+                    // We retrieve the row as a polynomial list
+                    let mut polynomial_list = rlwe_ct.into_polynomial_list();
+                    // We retrieve the polynomial in the diagonal
+                    let mut level_polynomial = polynomial_list.get_mut_polynomial(index);
+                    // We get the first coefficient
+                    let first_coef = level_polynomial.as_mut_tensor().first_mut();
+                    // We update the first coefficient
+                    *first_coef = first_coef.wrapping_add(decomposition);
+                }
+            })
     }
 
     /// This function encrypts a message as a GGSW ciphertext whose rlwe masks are all zeros.
