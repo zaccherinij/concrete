@@ -15,10 +15,7 @@ use concrete_core::math::decomposition::{DecompositionBaseLog, DecompositionLeve
 use concrete_core::math::dispersion::{DispersionParameter, LogStandardDev, Variance};
 use concrete_core::math::fft::{Complex64, Fft, FourierPolynomial};
 use concrete_core::math::polynomial::PolynomialSize;
-use concrete_core::math::random::{
-    fill_with_random_uniform, fill_with_random_uniform_boolean, random_uniform_n_msb,
-    RandomGenerable, UniformMsb,
-};
+use concrete_core::math::random::{RandomGenerable, UniformMsb};
 use concrete_core::math::tensor::{
     AsMutSlice, AsMutTensor, AsRefSlice, AsRefTensor, IntoTensor, Tensor,
 };

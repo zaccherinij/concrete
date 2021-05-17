@@ -14,10 +14,7 @@ use concrete_core::crypto::{
 use concrete_core::math::dispersion::{DispersionParameter, LogStandardDev, Variance};
 use concrete_core::math::fft::{Complex64, Fft, FourierPolynomial};
 use concrete_core::math::polynomial::PolynomialSize;
-use concrete_core::math::random::{
-    fill_with_random_uniform, fill_with_random_uniform_boolean, random_uniform_n_msb,
-    RandomGenerable, Uniform, UniformMsb,
-};
+use concrete_core::math::random::{RandomGenerable, RandomGenerator, Uniform, UniformMsb};
 use concrete_core::math::tensor::{
     AsMutSlice, AsMutTensor, AsRefSlice, AsRefTensor, IntoTensor, Tensor,
 };
@@ -25,10 +22,11 @@ use concrete_core::numeric::{CastFrom, CastInto, Numeric, UnsignedInteger};
 
 pub fn bench<T: UnsignedInteger + RandomGenerable<Uniform>>(c: &mut Criterion) {
     let name = format!("random generate 100_000 u{}", T::BITS);
+    let mut generator = RandomGenerator::new(None);
     c.bench_function(name.as_str(), |b| {
         b.iter(|| {
             let mut tensor: Tensor<Vec<T>> = Tensor::allocate(T::ZERO, black_box(100_000));
-            black_box(fill_with_random_uniform(&mut tensor));
+            black_box(generator.fill_tensor_with_random_uniform(&mut tensor));
         })
     });
 }

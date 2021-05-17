@@ -371,6 +371,7 @@ impl<Cont> BootstrapKey<Cont> {
         }
     }
 
+    #[cfg(feature = "multithread")]
     pub fn fill_with_new_key_multi<LweCont, RlweCont, Scalar>(
         &mut self,
         lwe_secret_key: &LweSecretKey<LweCont>,

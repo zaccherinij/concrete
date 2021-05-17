@@ -49,6 +49,8 @@ multithread = ["rayon"]
 [[bench]]
 name = "bench"
 harness = false
+required-features = ["multithread"]
+
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--html-in-header", "katex-header.html"]

@@ -15,10 +15,7 @@ use concrete_core::math::decomposition::{DecompositionBaseLog, DecompositionLeve
 use concrete_core::math::dispersion::{DispersionParameter, LogStandardDev, Variance};
 use concrete_core::math::fft::{Complex64, Fft, FourierPolynomial};
 use concrete_core::math::polynomial::PolynomialSize;
-use concrete_core::math::random::{
-    fill_with_random_uniform, fill_with_random_uniform_boolean, random_uniform_n_msb,
-    RandomGenerable, UniformMsb,
-};
+use concrete_core::math::random::{EncryptionRng, RandomGenerable, RandomGenerator, UniformMsb};
 use concrete_core::math::tensor::{
     AsMutSlice, AsMutTensor, AsRefSlice, AsRefTensor, IntoTensor, Tensor,
 };
@@ -37,14 +34,16 @@ pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
                 // --------> all allocation
                 let lwe_dimension = LweDimension(**p as usize);
                 let std = LogStandardDev::from_log_standard_dev(-29.);
+                let mut gen = RandomGenerator::new(None);
 
                 // allocate secret keys
-                let mut sk = LweSecretKey::generate(lwe_dimension);
+                let mut sk = LweSecretKey::generate(lwe_dimension, &mut gen);
 
                 let mut ciphertext = LweCiphertext::allocate(T::ZERO, lwe_dimension.to_lwe_size());
                 let plaintext = Plaintext(T::ZERO);
 
-                b.iter(|| sk.encrypt_lwe(&mut ciphertext, &plaintext, std));
+                let mut rng = EncryptionRng::new(None);
+                b.iter(|| sk.encrypt_lwe(&mut ciphertext, &plaintext, std, &mut rng));
             },
         );
     }

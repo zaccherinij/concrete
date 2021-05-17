@@ -15,10 +15,7 @@ use concrete_core::math::decomposition::{DecompositionBaseLog, DecompositionLeve
 use concrete_core::math::dispersion::{DispersionParameter, LogStandardDev, Variance};
 use concrete_core::math::fft::{Complex64, Fft, FourierPolynomial};
 use concrete_core::math::polynomial::PolynomialSize;
-use concrete_core::math::random::{
-    fill_with_random_uniform, fill_with_random_uniform_boolean, random_uniform_n_msb,
-    RandomGenerable, UniformMsb,
-};
+use concrete_core::math::random::{EncryptionRng, RandomGenerable, RandomGenerator, UniformMsb};
 use concrete_core::math::tensor::{
     AsMutSlice, AsMutTensor, AsRefSlice, AsRefTensor, IntoTensor, Tensor,
 };
@@ -41,9 +38,11 @@ pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
                 let polynomial_size = PolynomialSize(p.1);
                 let rlwe_dimension = GlweDimension(p.0);
                 let std = LogStandardDev::from_log_standard_dev(-29.);
+                let mut gen = RandomGenerator::new(None);
 
                 // allocate secret keys
-                let mut rlwe_sk = GlweSecretKey::generate(rlwe_dimension, polynomial_size);
+                let mut rlwe_sk =
+                    GlweSecretKey::generate(rlwe_dimension, polynomial_size, &mut gen);
 
                 let mut ciphertext = GlweCiphertext::allocate(
                     T::ZERO,
@@ -52,7 +51,8 @@ pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
                 );
                 let plaintext = PlaintextList::allocate(T::ZERO, PlaintextCount(polynomial_size.0));
 
-                b.iter(|| rlwe_sk.encrypt_glwe(&mut ciphertext, &plaintext, std));
+                let mut rng = EncryptionRng::new(None);
+                b.iter(|| rlwe_sk.encrypt_glwe(&mut ciphertext, &plaintext, std, &mut rng));
             },
         );
     }

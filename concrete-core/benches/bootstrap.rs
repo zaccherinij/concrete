@@ -15,10 +15,7 @@ use concrete_core::math::decomposition::{DecompositionBaseLog, DecompositionLeve
 use concrete_core::math::dispersion::{DispersionParameter, LogStandardDev, Variance};
 use concrete_core::math::fft::{Complex64, Fft, FourierPolynomial};
 use concrete_core::math::polynomial::PolynomialSize;
-use concrete_core::math::random::{
-    fill_with_random_uniform, fill_with_random_uniform_boolean, random_uniform_n_msb,
-    RandomGenerable, UniformMsb,
-};
+use concrete_core::math::random::{EncryptionRng, RandomGenerable, RandomGenerator, UniformMsb};
 use concrete_core::math::tensor::{
     AsMutSlice, AsMutTensor, AsRefSlice, AsRefTensor, IntoTensor, Tensor,
 };
@@ -56,10 +53,11 @@ pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
                 let level = DecompositionLevelCount(p.1);
                 let base_log = DecompositionBaseLog(7);
                 let std = LogStandardDev::from_log_standard_dev(-29.);
-
+                let mut generator = RandomGenerator::new(None);
                 // allocate secret keys
-                let mut rlwe_sk = GlweSecretKey::generate(rlwe_dimension, polynomial_size);
-                let mut lwe_sk = LweSecretKey::generate(lwe_dimension);
+                let mut rlwe_sk =
+                    GlweSecretKey::generate(rlwe_dimension, polynomial_size, &mut generator);
+                let mut lwe_sk = LweSecretKey::generate(lwe_dimension, &mut generator);
 
                 let mut fourier_bsk = BootstrapKey::from_container(
                     vec![
@@ -97,7 +95,8 @@ pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
                     rlwe_dimension.to_glwe_size(),
                 );
 
-                lwe_sk.encrypt_lwe(&mut lwe_in, &m0, std);
+                let mut rng = EncryptionRng::new(None);
+                lwe_sk.encrypt_lwe(&mut lwe_in, &m0, std, &mut rng);
 
                 // fill accumulator
                 for (i, elt) in accumulator
