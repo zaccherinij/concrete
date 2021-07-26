@@ -32,6 +32,24 @@ where
     kind: PhantomData<Kind>,
 }
 
+impl<Kind, Scalar> GlweSecretKey<Kind, Vec<Scalar>>
+where
+    Kind: KeyKind,
+    Scalar: Copy,
+{
+    pub fn allocate(
+        value: Scalar,
+        dimension: GlweDimension,
+        poly_size: PolynomialSize,
+    ) -> GlweSecretKey<Kind, Vec<Scalar>> {
+        GlweSecretKey {
+            tensor: Tensor::allocate(value, poly_size.0 * dimension.0),
+            poly_size,
+            kind: PhantomData,
+        }
+    }
+}
+
 impl<Scalar> GlweSecretKey<BinaryKeyKind, Vec<Scalar>>
 where
     Scalar: UnsignedTorus,
@@ -62,6 +80,10 @@ where
             poly_size,
             kind: PhantomData,
         }
+    }
+
+    pub fn fill_with_binary(&mut self, generator: &mut SecretRandomGenerator) {
+        generator.fill_with_random_binary(self)
     }
 }
 

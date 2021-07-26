@@ -40,6 +40,12 @@ macro_rules! cmd {
     (<$env: ident> $cmd: literal) => {
         $crate::utils::execute($cmd, Some(&*$env), Some(&*$crate::ROOT_DIR))
     };
+    (<<$path: ident>> $cmd: literal) => {
+        $crate::utils::execute($cmd, None, Some(&*$path))
+    };
+    (<$env: ident> <<$path: ident>> $cmd: literal) => {
+        $crate::utils::execute($cmd, Some(&*$env), Some(&*$path))
+    };
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -79,6 +85,7 @@ fn main() -> Result<(), std::io::Error> {
             App::new("test_csprng").about("Tests the `concrete-csprng` crate in native mode"),
         )
         .subcommand(App::new("test_npe").about("Tests the `concrete-npe` crate in native mode"))
+        .subcommand(App::new("test_ffi").about("Tests the `concrete-ffi` crate on C side"))
         .subcommand(App::new("test_crates").about("Tests all the crates in native mode"))
         .subcommand(
             App::new("test_and_cov_crates")
@@ -117,6 +124,7 @@ fn main() -> Result<(), std::io::Error> {
     // We execute the task.
     if matches.subcommand_matches("test").is_some() {
         test::crates()?;
+        test::ffi()?;
     }
     if matches.subcommand_matches("cov").is_some() {
         test::cov_crates()?;
@@ -154,6 +162,9 @@ fn main() -> Result<(), std::io::Error> {
     }
     if matches.subcommand_matches("test_npe").is_some() {
         test::npe()?;
+    }
+    if matches.subcommand_matches("test_ffi").is_some() {
+        test::ffi()?;
     }
     if matches.subcommand_matches("test_crates").is_some() {
         test::crates()?;

@@ -1,1 +1,1 @@
-pub mod array;
+pub mod core;

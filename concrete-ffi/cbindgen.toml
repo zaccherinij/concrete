@@ -138,7 +138,7 @@ bitflags = false
 
 [parse]
 parse_deps = true
-include = ["concrete-commons"]
+include = ["concrete-commons", "concrete-core"]
 exclude = []
 clean = false
 extra_bindings = []

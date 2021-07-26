@@ -1,5 +1,5 @@
 use crate::math::random::{Gaussian, RandomGenerable, RandomGenerator};
-use crate::math::tensor::Tensor;
+use crate::math::tensor::{AsMutTensor, Tensor};
 use crate::math::torus::UnsignedTorus;
 use concrete_commons::dispersion::DispersionParameter;
 
@@ -28,6 +28,14 @@ impl SecretRandomGenerator {
         Scalar: UnsignedTorus,
     {
         self.0.random_uniform_binary_tensor(length)
+    }
+
+    pub(crate) fn fill_with_random_binary<Scalar, Tensorable>(&mut self, tensor: &mut Tensorable)
+    where
+        Tensorable: AsMutTensor<Element = Scalar>,
+        Scalar: UnsignedTorus,
+    {
+        self.0.fill_tensor_with_random_uniform_binary(tensor);
     }
 
     // Returns a tensor with random uniform ternary values.
