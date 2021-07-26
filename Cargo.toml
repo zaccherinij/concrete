@@ -7,7 +7,7 @@ members = [
     "concrete-csprng",
     "concrete-commons",
     "concrete-ffi",
-    "concrete-tasks
+    "concrete-tasks"
 ]
 
 [profile.bench]

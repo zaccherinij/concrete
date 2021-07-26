@@ -24,6 +24,19 @@ where
     pub(crate) kind: PhantomData<Kind>,
 }
 
+impl<Kind, Scalar> LweSecretKey<Kind, Vec<Scalar>>
+where
+    Kind: KeyKind,
+    Scalar: Copy,
+{
+    pub fn allocate(value: Scalar, size: LweDimension) -> LweSecretKey<Kind, Vec<Scalar>> {
+        LweSecretKey {
+            tensor: Tensor::allocate(value, size.0),
+            kind: PhantomData,
+        }
+    }
+}
+
 impl<Scalar> LweSecretKey<BinaryKeyKind, Vec<Scalar>>
 where
     Scalar: UnsignedTorus,
@@ -48,6 +61,10 @@ where
             tensor: generator.random_binary_tensor(size.0),
             kind: PhantomData,
         }
+    }
+
+    pub fn fill_with_binary(&mut self, generator: &mut SecretRandomGenerator) {
+        generator.fill_with_random_binary(self);
     }
 }
 

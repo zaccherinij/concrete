@@ -1,9 +1,16 @@
-use crate::utils::Environment;
+use crate::utils::{project_root, Environment};
 use crate::{cmd, ENV_TARGET_NATIVE};
 use std::collections::HashMap;
 use std::io::Error;
+use std::path::PathBuf;
 
 lazy_static! {
+    static ref CONCRETE_FFI_TEST_DIR: PathBuf = {
+        let mut path = project_root();
+        path.push("concrete-ffi");
+        path.push("build");
+        path
+    };
     static ref ENV_COVERAGE: Environment = {
         let mut env = HashMap::new();
         env.insert("CARGO_INCREMENTAL", "0");
@@ -31,6 +38,15 @@ pub fn csprng() -> Result<(), Error> {
 
 pub fn npe() -> Result<(), Error> {
     cmd!(<ENV_TARGET_NATIVE> "cargo test --release --no-fail-fast --all-features -p concrete-npe")
+}
+
+pub fn ffi() -> Result<(), Error> {
+    if !CONCRETE_FFI_TEST_DIR.exists() {
+        std::fs::create_dir(&*CONCRETE_FFI_TEST_DIR)?;
+    }
+    cmd!(<<CONCRETE_FFI_TEST_DIR>> "cmake make ..")?;
+    cmd!(<<CONCRETE_FFI_TEST_DIR>> "make")?;
+    cmd!(<<CONCRETE_FFI_TEST_DIR>> "make test")
 }
 
 pub fn crates() -> Result<(), Error> {

@@ -6,7 +6,7 @@ use concrete_commons::parameters::PlaintextCount;
 
 /// An plaintext (encoded) value.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(transparent)]
+#[repr(C)]
 pub struct Plaintext<T: Numeric>(pub T);
 
 /// A list of plaintexts

@@ -261,6 +261,24 @@ impl<Cont> LweCiphertext<Cont> {
             .fill_with_one(input.as_tensor(), |o| o.wrapping_mul(scalar.0));
     }
 
+    pub fn fill_with_scalar_add<Scalar, InputCont>(
+        &mut self,
+        input: &LweCiphertext<InputCont>,
+        scalar: &Plaintext<Scalar>,
+    ) where
+        Self: AsMutTensor<Element = Scalar>,
+        LweCiphertext<InputCont>: AsRefTensor<Element = Scalar>,
+        Scalar: UnsignedInteger,
+    {
+        let (self_body, mut self_mask) = self.get_mut_body_and_mask();
+        let (input_body, input_mask) = input.get_body_and_mask();
+        self_mask
+            .as_mut_tensor()
+            .fill_with_copy(input_mask.as_tensor());
+        let new_body = (input_body.0).wrapping_add(scalar.0);
+        *self_body = LweBody(new_body);
+    }
+
     /// Fills the ciphertext with the result of the multisum of the `input_list` with the
     /// `weights` values, and adds a bias.
     ///
@@ -391,6 +409,20 @@ impl<Cont> LweCiphertext<Cont> {
             .update_with_wrapping_add(other.as_tensor())
     }
 
+    pub fn fill_with_add<InputCont1, InputCont2, Scalar>(
+        &mut self,
+        input1: &LweCiphertext<InputCont1>,
+        input2: &LweCiphertext<InputCont2>,
+    ) where
+        Self: AsMutTensor<Element = Scalar>,
+        LweCiphertext<InputCont1>: AsRefTensor<Element = Scalar>,
+        LweCiphertext<InputCont2>: AsRefTensor<Element = Scalar>,
+        Scalar: UnsignedTorus,
+    {
+        self.as_mut_tensor()
+            .fill_with_wrapping_add(input1.as_tensor(), input2.as_tensor());
+    }
+
     /// Subtracts the `other` ciphertext from the current one.
     ///
     /// # Example
@@ -488,6 +520,16 @@ impl<Cont> LweCiphertext<Cont> {
         Scalar: UnsignedTorus,
     {
         self.as_mut_tensor().update_with_wrapping_neg()
+    }
+
+    pub fn fill_with_neg<InputCont, Scalar>(&mut self, input: &LweCiphertext<InputCont>)
+    where
+        Self: AsMutTensor<Element = Scalar>,
+        Scalar: UnsignedTorus,
+        LweCiphertext<InputCont>: AsRefTensor<Element = Scalar>,
+    {
+        self.as_mut_tensor()
+            .fill_with_one(input.as_tensor(), |e| e.wrapping_neg());
     }
 
     /// Multiplies the current ciphertext with a scalar value inplace.
