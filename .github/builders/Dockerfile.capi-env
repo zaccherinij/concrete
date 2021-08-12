@@ -1,0 +1,5 @@
+FROM rust:1.54-buster
+
+COPY / /
+ENV CONCRETE_RELEASE_DIR="/target/release"
+RUN cargo build -p concrete-ffi --release
