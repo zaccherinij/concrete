@@ -21,9 +21,11 @@ int main(void)
     // We generate the keys
     LweSize input_lwe_size = {600};
     LweSecretKey_u64 *input_lwe_sk = NO_ERR(allocate_lwe_secret_key_u64(&ERR, input_lwe_size));
+    NO_ERR(fill_lwe_secret_key_u64(&ERR, input_lwe_sk, secret_gen));
     GlweSize glwe_size = { 2 };
     PolynomialSize poly_size = { 1024 };
     GlweSecretKey_u64 *glwe_sk = NO_ERR(allocate_glwe_secret_key_u64(&ERR, glwe_size, poly_size));
+    NO_ERR(fill_glwe_secret_key_u64(&ERR, glwe_sk, secret_gen));
     DecompositionLevelCount level = {4 };
     DecompositionBaseLog base_log = {7 };
     LweBootstrapKey_u64 *bsk = NO_ERR(allocate_lwe_bootstrap_key_u64(
