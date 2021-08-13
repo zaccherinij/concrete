@@ -1,9 +1,10 @@
 use super::{GlweBody, GlweMask};
+use crate::crypto::encoding::PlaintextList;
 use crate::crypto::lwe::LweCiphertext;
 use crate::math::polynomial::{MonomialDegree, PolynomialList};
 use crate::math::tensor::{AsMutSlice, AsMutTensor, AsRefSlice, AsRefTensor, Tensor};
 use crate::math::torus::UnsignedTorus;
-use crate::tensor_traits;
+use crate::{ck_dim_eq, tensor_traits};
 use concrete_commons::parameters::{GlweDimension, GlweSize, PolynomialSize};
 use serde::{Deserialize, Serialize};
 
@@ -450,5 +451,24 @@ impl<Cont> GlweCiphertext<Cont> {
             // We rotate the polynomial properly
             lwe_mask_poly.rotate_left(negated_count);
         }
+    }
+
+    pub fn fill_with_plaintext_list_add<Scalar, InputCont1, InputCont2>(
+        &mut self,
+        input: &GlweCiphertext<InputCont1>,
+        plaintext_list: &PlaintextList<InputCont2>,
+    ) where
+        Self: AsMutTensor<Element = Scalar>,
+        GlweCiphertext<InputCont1>: AsRefTensor<Element = Scalar>,
+        PlaintextList<InputCont2>: AsRefTensor<Element = Scalar>,
+        Scalar: UnsignedTorus,
+    {
+        ck_dim_eq!(self.poly_size.0 => plaintext_list.count().0);
+        ck_dim_eq!(self.poly_size => input.poly_size);
+        ck_dim_eq!(self.mask_size() => input.mask_size());
+        self.as_mut_tensor().fill_with_copy(input.as_tensor());
+        self.get_mut_body()
+            .as_mut_polynomial()
+            .update_with_wrapping_add(&plaintext_list.as_polynomial());
     }
 }

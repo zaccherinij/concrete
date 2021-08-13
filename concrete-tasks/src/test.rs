@@ -44,9 +44,10 @@ pub fn ffi() -> Result<(), Error> {
     if !CONCRETE_FFI_TEST_DIR.exists() {
         std::fs::create_dir(&*CONCRETE_FFI_TEST_DIR)?;
     }
+    cmd!("cargo build --release -p concrete-ffi")?;
     cmd!(<<CONCRETE_FFI_TEST_DIR>> "cmake make ..")?;
     cmd!(<<CONCRETE_FFI_TEST_DIR>> "make")?;
-    cmd!(<<CONCRETE_FFI_TEST_DIR>> "make test")
+    cmd!(<<CONCRETE_FFI_TEST_DIR>> "ctest --verbose --output-on-failure")
 }
 
 pub fn crates() -> Result<(), Error> {

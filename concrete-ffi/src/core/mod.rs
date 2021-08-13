@@ -306,6 +306,45 @@ pub unsafe extern "C" fn allocate_glwe_ciphertext_u32(
     allocate_glwe_ciphertext(err, size, poly_size)
 }
 
+unsafe fn add_plaintext_list_glwe_ciphertext<T: UnsignedTorus>(
+    err: *mut c_int,
+    output_ciphertext: *mut GlweCiphertext<T>,
+    input_ciphertext: *const GlweCiphertext<T>,
+    plaintext_list: *const PlaintextList<T>,
+) {
+    if pointers_null!(output_ciphertext, input_ciphertext, plaintext_list) {
+        set_err!(err, ERR_NULL_POINTER);
+        return;
+    }
+    let output_ciphertext = output_ciphertext.as_mut().unwrap();
+    let input_ciphertext = input_ciphertext.as_ref().unwrap();
+    let plaintext_list = plaintext_list.as_ref().unwrap();
+    output_ciphertext
+        .0
+        .fill_with_plaintext_list_add(&input_ciphertext.0, &plaintext_list.0);
+    set_err!(err, ERR_NO_ERR);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn add_plaintext_list_glwe_ciphertext_u32(
+    err: *mut c_int,
+    output_ciphertext: *mut GlweCiphertext<u32>,
+    input_ciphertext: *const GlweCiphertext<u32>,
+    plaintext_list: *const PlaintextList<u32>,
+) {
+    add_plaintext_list_glwe_ciphertext(err, output_ciphertext, input_ciphertext, plaintext_list)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn add_plaintext_list_glwe_ciphertext_u64(
+    err: *mut c_int,
+    output_ciphertext: *mut GlweCiphertext<u64>,
+    input_ciphertext: *const GlweCiphertext<u64>,
+    plaintext_list: *const PlaintextList<u64>,
+) {
+    add_plaintext_list_glwe_ciphertext(err, output_ciphertext, input_ciphertext, plaintext_list)
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn free_glwe_ciphertext_u64(
     err: *mut c_int,
@@ -1003,6 +1042,43 @@ pub unsafe extern "C" fn allocate_lwe_bootstrap_key_u32(
         lwe_size,
         poly_size,
     )
+}
+
+unsafe fn copy_lwe_bootstrap_key<T: UnsignedTorus>(
+    err: *mut c_int,
+    output: *mut LweBootstrapKey<T>,
+    input: *const LweBootstrapKey<T>
+){
+    if pointers_null!(input, output) {
+        set_err!(err, ERR_NULL_POINTER);
+        return;
+    }
+    let input = input.as_ref().unwrap();
+    let output = output.as_mut().unwrap();
+    if input.0.as_tensor().len() != output.0.as_tensor().len(){
+        set_err!(err, ERR_SIZE_MISMATCH);
+        return;
+    }
+    output.0.as_mut_tensor().fill_with_copy(input.0.as_tensor());
+    set_err!(err, ERR_NO_ERR);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn copy_lwe_bootstrap_key_u64(
+    err: *mut c_int,
+    output: *mut LweBootstrapKey<u64>,
+    input: *const LweBootstrapKey<u64>
+){
+    copy_lwe_bootstrap_key(err, output, input);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn copy_lwe_bootstrap_key_u32(
+    err: *mut c_int,
+    output: *mut LweBootstrapKey<u32>,
+    input: *const LweBootstrapKey<u32>
+){
+    copy_lwe_bootstrap_key(err, output, input);
 }
 
 unsafe fn fill_lwe_bootstrap_key<T: UnsignedTorus>(
