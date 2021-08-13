@@ -27,8 +27,8 @@ int main(void)
     LweCiphertext_u64 *input_ct_1 = NO_ERR(allocate_lwe_ciphertext_u64(&ERR, lwe_size));
     LweCiphertext_u64 *input_ct_2 = NO_ERR(allocate_lwe_ciphertext_u64(&ERR, lwe_size));
     LweCiphertext_u64 *output_ct = NO_ERR(allocate_lwe_ciphertext_u64(&ERR, lwe_size));
-    Plaintext_u64 plaintext_1 = { 1 << SHIFT };
-    Plaintext_u64 plaintext_2 = { 2 << SHIFT };
+    Plaintext_u64 plaintext_1 = { ((uint64_t) 1) << SHIFT };
+    Plaintext_u64 plaintext_2 = { ((uint64_t) 2) << SHIFT };
     Plaintext_u64 output = { 0 };
 
     // We encrypt the plaintext
@@ -42,8 +42,9 @@ int main(void)
     NO_ERR(decrypt_lwe_u64(&ERR, sk, output_ct, &output));
 
     // We check that the output are the same
-    double expected = (double)plaintext_2._0 + (double)plaintext_1._0;
-    double obtained = (double) output._0;
+    double expected = ((double)plaintext_2._0 + (double)plaintext_1._0) / pow(2, SHIFT);
+    double obtained = (double) output._0 / pow(2, SHIFT);
+    printf("Comparing output. Expected %f, Obtained %f\n", expected, obtained);
     double abs_diff = abs(obtained - expected);
     double rel_error = abs_diff / fmax(expected, obtained);
     assert(rel_error < 0.002);

@@ -29,9 +29,9 @@ int main(void)
                                                                          poly_size));
     PlaintextCount count = {3};
     PlaintextList_u64 *plaintext_list =NO_ERR(allocate_plaintext_list_u64(&ERR, count));
-    NO_ERR(set_plaintext_list_element_u64(&ERR, plaintext_list, 0, 1 << SHIFT));
-    NO_ERR(set_plaintext_list_element_u64(&ERR, plaintext_list, 1, 2 << SHIFT));
-    NO_ERR(set_plaintext_list_element_u64(&ERR, plaintext_list, 2, 3 << SHIFT));
+    NO_ERR(set_plaintext_list_element_u64(&ERR, plaintext_list, 0, ((uint64_t) 1) << SHIFT));
+    NO_ERR(set_plaintext_list_element_u64(&ERR, plaintext_list, 1, ((uint64_t) 2) << SHIFT));
+    NO_ERR(set_plaintext_list_element_u64(&ERR, plaintext_list, 2, ((uint64_t) 3) << SHIFT));
     PlaintextList_u64 *output_list =NO_ERR(allocate_plaintext_list_u64(&ERR, count));
 
     // We encrypt the plaintext
@@ -44,8 +44,9 @@ int main(void)
     for (int i = 0; i < 3; ++i) {
         uint64_t plaintext = NO_ERR(get_plaintext_list_element_u64(&ERR,plaintext_list,i));
         uint64_t output = NO_ERR(get_plaintext_list_element_u64(&ERR,output_list,i));
-        double expected = (double)plaintext;
-        double obtained = (double)output;
+        double expected = (double)plaintext / pow(2, SHIFT);
+        double obtained = (double)output / pow(2, SHIFT);
+        printf("Comparing %i-th component. Expected %f, Obtained %f\n", i, expected, obtained);
         double abs_diff = abs(obtained - expected);
         double rel_error = abs_diff / fmax(expected, obtained);
         assert(rel_error < 0.001);
