@@ -19,33 +19,46 @@ use concrete_core::math::tensor::AsMutTensor;
 use concrete_core::math::torus::UnsignedTorus;
 
 pub fn bench<T: UnsignedTorus + CastFrom<u64>>(c: &mut Criterion) {
-    let lwe_dimensions = vec![512]; // 512;
-    let l_gadgets = vec![1, 3, 10];
-    let rlwe_dimensions = vec![1, 2, 3];
-    let degrees = vec![1024];
-    let params = iproduct!(lwe_dimensions, l_gadgets, rlwe_dimensions, degrees);
-    let mut group = c.benchmark_group("compilo-bootstrap");
+    let values = vec![
+        (1, 1024, 472, 2, 8),
+        (1, 1024, 514, 2, 8),
+        (1, 1024, 564, 2, 8),
+        (1, 1024, 599, 3, 6),
+        (1, 1024, 686, 3, 6),
+        (1, 2048, 737, 1, 21),
+        (1, 4096, 848, 1, 21),
+        (1, 4096, 900, 10, 4),
+        (1, 2048, 510, 4, 8),
+        (1, 2048, 538, 5, 7),
+        (1, 2048, 629, 5, 7),
+        (1, 2048, 650, 7, 5),
+        (1, 2048, 674, 10, 4),
+        (1, 2048, 741, 19, 2),
+        (1, 4096, 900, 10, 4),
+    ];
+    let mut group = c.benchmark_group("bootstrap");
     let mut secret_generator = SecretRandomGenerator::new(None);
     let mut encryption_generator = EncryptionRandomGenerator::new(None);
-    for p in params {
+    for p in values {
         // group.throughput(Throughput::Bytes(*size as u64));
         group.bench_with_input(
             BenchmarkId::from_parameter(format!(
-                "p={}-n={}-l={}-k={}-N={}",
+                "(p={}, k={}, N={}, n={}, l={}, B={})",
                 T::BITS,
                 p.0,
                 p.1,
                 p.2,
-                p.3
+                p.3,
+                p.4
             )),
             &p,
             |b, p| {
                 // --------> all allocation
-                let polynomial_size = PolynomialSize(p.3);
-                let rlwe_dimension = GlweDimension(p.2);
-                let lwe_dimension = LweDimension(p.0);
-                let level = DecompositionLevelCount(p.1);
-                let base_log = DecompositionBaseLog(7);
+                let polynomial_size = PolynomialSize(p.1);
+                let rlwe_dimension = GlweDimension(p.0);
+                let lwe_dimension = LweDimension(p.2);
+                let level = DecompositionLevelCount(p.3);
+                let base_log = DecompositionBaseLog(p.4);
                 let std = LogStandardDev::from_log_standard_dev(-29.);
 
                 let lwe_sk = LweSecretKey::generate_binary(lwe_dimension, &mut secret_generator);
