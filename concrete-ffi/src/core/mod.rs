@@ -382,7 +382,7 @@ pub unsafe extern "C" fn allocate_encryption_generator(
     seed_lsb: u64,
 ) -> *mut EncryptionRandomGenerator {
     let generator = if seed_msb == 0 && seed_lsb == 0 {
-        CoreEncryptionRandomGenerator::new(None)
+        CoreEncryptionRandomGenerator::new(Some(0))
     } else {
         let seed = ((seed_msb as u128) << 64) + (seed_lsb as u128);
         CoreEncryptionRandomGenerator::new(Some(seed))
@@ -416,7 +416,7 @@ pub unsafe extern "C" fn allocate_secret_generator(
     seed_lsb: u64,
 ) -> *mut SecretRandomGenerator {
     let generator = if seed_msb == 0 && seed_lsb == 0 {
-        CoreSecretRandomGenerator::new(None)
+        CoreSecretRandomGenerator::new(Some(0))
     } else {
         let seed = ((seed_msb as u128) << 64) + (seed_lsb as u128);
         CoreSecretRandomGenerator::new(Some(seed))

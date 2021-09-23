@@ -20,9 +20,10 @@ pub struct EncryptionRandomGenerator {
 impl EncryptionRandomGenerator {
     /// Creates a new encryption, optionally seeding it with the given value.
     pub fn new(seed: Option<u128>) -> EncryptionRandomGenerator {
+        print!("encryption seed {:?}", seed.unwrap_or_default());
         EncryptionRandomGenerator {
             mask: RandomGenerator::new(seed),
-            noise: RandomGenerator::new(None),
+            noise: RandomGenerator::new(seed),
         }
     }
 
