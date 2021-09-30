@@ -45,7 +45,7 @@ where
     decomp_base_log: DecompositionBaseLog,
     // The fft plan is stored here. This way, we don't pay the price of allocating it every
     // time we need to bootstrap with the same key.
-    fft: Fft,
+    pub fft: Fft,
     // The buffers used to perform the fft are also stored in the bootstrap key. Again, the same
     // logic apply, and we don't have to allocate them multiple times.
     fft_first_buffer: RefCell<FourierPolynomial<AlignedVec<Complex64>>>,
@@ -496,7 +496,7 @@ where
             })
     }
 
-    fn external_product<C1, C2, C3>(
+    pub fn external_product<C1, C2, C3>(
         &self,
         output: &mut GlweCiphertext<C1>,
         ggsw: &GgswCiphertext<C2>,
@@ -682,7 +682,7 @@ where
     }
 
     // This cmux mutates both ct1 and ct0. The result is in ct0 after the method was called.
-    fn cmux<C0, C1, C2>(
+    pub fn cmux<C0, C1, C2>(
         &self,
         ct0: &mut GlweCiphertext<C0>,
         ct1: &mut GlweCiphertext<C1>,
