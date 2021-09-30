@@ -1,6 +1,7 @@
 //! This module contains types to manage the different kinds of secret keys.
 
 /// This type is a marker for keys using binary elements as scalar.
+#[derive(Clone)]
 pub struct BinaryKeyKind;
 /// This type is a marker for keys using ternary elements as scalar.
 pub struct TernaryKeyKind;
