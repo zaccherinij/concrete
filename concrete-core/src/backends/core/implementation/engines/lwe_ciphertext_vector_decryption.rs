@@ -1,3 +1,5 @@
+use concrete_commons::parameters::PlaintextCount;
+
 use crate::backends::core::implementation::engines::CoreEngine;
 use crate::backends::core::implementation::entities::{
     LweCiphertextVector32, LweCiphertextVector64, LweSecretKey32, LweSecretKey64,
@@ -8,11 +10,38 @@ use crate::specification::engines::{
     LweCiphertextVectorDecryptionEngine, LweCiphertextVectorDecryptionError,
 };
 use crate::specification::entities::LweCiphertextVectorEntity;
-use concrete_commons::parameters::PlaintextCount;
 
 impl LweCiphertextVectorDecryptionEngine<LweSecretKey32, LweCiphertextVector32, PlaintextVector32>
     for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::{LweCiphertextCount, LweDimension, PlaintextCount};
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let lwe_dimension = LweDimension(6);
+    /// // Here a hard-set encoding is applied (shift by 20 bits)
+    /// let input = vec![3_u32 << 20; 18];
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let plaintext_vector: PlaintextVector32 = engine.create_plaintext_vector(&input).unwrap();
+    /// let ciphertext_vector: LweCiphertextVector32 = engine
+    ///     .encrypt_lwe_ciphertext_vector(&key, &plaintext_vector, noise)
+    ///     .unwrap();
+    /// let decrypted_plaintext_vector = engine
+    ///     .decrypt_lwe_ciphertext_vector(&key, &ciphertext_vector)
+    ///     .unwrap();
+    /// assert_eq!(
+    ///     decrypted_plaintext_vector.plaintext_count(),
+    ///     PlaintextCount(18)
+    /// );
+    /// engine.destroy(ciphertext_vector).unwrap();
+    /// engine.destroy(plaintext_vector).unwrap();
+    /// engine.destroy(decrypted_plaintext_vector).unwrap();
+    /// engine.destroy(key).unwrap();
+    /// ```
     fn decrypt_lwe_ciphertext_vector(
         &mut self,
         key: &LweSecretKey32,
@@ -36,6 +65,34 @@ impl LweCiphertextVectorDecryptionEngine<LweSecretKey32, LweCiphertextVector32, 
 impl LweCiphertextVectorDecryptionEngine<LweSecretKey64, LweCiphertextVector64, PlaintextVector64>
     for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::{LweCiphertextCount, LweDimension, PlaintextCount};
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let lwe_dimension = LweDimension(6);
+    /// // Here a hard-set encoding is applied (shift by 50 bits)
+    /// let input = vec![3_u64 << 50; 18];
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let plaintext_vector: PlaintextVector64 = engine.create_plaintext_vector(&input).unwrap();
+    /// let ciphertext_vector: LweCiphertextVector64 = engine
+    ///     .encrypt_lwe_ciphertext_vector(&key, &plaintext_vector, noise)
+    ///     .unwrap();
+    /// let decrypted_plaintext_vector = engine
+    ///     .decrypt_lwe_ciphertext_vector(&key, &ciphertext_vector)
+    ///     .unwrap();
+    /// assert_eq!(
+    ///     decrypted_plaintext_vector.plaintext_count(),
+    ///     PlaintextCount(18)
+    /// );
+    /// engine.destroy(ciphertext_vector).unwrap();
+    /// engine.destroy(plaintext_vector).unwrap();
+    /// engine.destroy(decrypted_plaintext_vector).unwrap();
+    /// engine.destroy(key).unwrap();
+    /// ```
     fn decrypt_lwe_ciphertext_vector(
         &mut self,
         key: &LweSecretKey64,

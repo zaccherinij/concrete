@@ -4,6 +4,16 @@ use crate::backends::core::private::crypto::encoding::CleartextList as ImplClear
 use crate::specification::engines::{CleartextVectorCreationEngine, CleartextVectorCreationError};
 
 impl CleartextVectorCreationEngine<u32, CleartextVector32> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::parameters::CleartextCount;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// let input = vec![3_u32; 100];
+    /// let cleartext_vector: CleartextVector32 = engine.create_cleartext_vector(&input).unwrap();
+    /// assert_eq!(cleartext_vector.cleartext_count(), CleartextCount(100));
+    /// engine.destroy(cleartext_vector).unwrap();
+    /// ```
     fn create_cleartext_vector(
         &mut self,
         input: &[u32],
@@ -20,6 +30,16 @@ impl CleartextVectorCreationEngine<u32, CleartextVector32> for CoreEngine {
 }
 
 impl CleartextVectorCreationEngine<u64, CleartextVector64> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::parameters::CleartextCount;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// let input = vec![3_u64; 100];
+    /// let cleartext_vector: CleartextVector64 = engine.create_cleartext_vector(&input).unwrap();
+    /// assert_eq!(cleartext_vector.cleartext_count(), CleartextCount(100));
+    /// engine.destroy(cleartext_vector).unwrap();
+    /// ```
     fn create_cleartext_vector(
         &mut self,
         input: &[u64],

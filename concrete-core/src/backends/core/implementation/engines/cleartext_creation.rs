@@ -4,6 +4,14 @@ use crate::backends::core::private::crypto::encoding::Cleartext as ImplCleartext
 use crate::specification::engines::{CleartextCreationEngine, CleartextCreationError};
 
 impl CleartextCreationEngine<u32, Cleartext32> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// let input: u32 = 3;
+    /// let cleartext: Cleartext32 = engine.create_cleartext(&input).unwrap();
+    /// engine.destroy(cleartext).unwrap();
+    /// ```
     fn create_cleartext(
         &mut self,
         input: &u32,
@@ -17,6 +25,14 @@ impl CleartextCreationEngine<u32, Cleartext32> for CoreEngine {
 }
 
 impl CleartextCreationEngine<u64, Cleartext64> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// let input: u64 = 3;
+    /// let cleartext: Cleartext64 = engine.create_cleartext(&input).unwrap();
+    /// engine.destroy(cleartext).unwrap();
+    /// ```
     fn create_cleartext(
         &mut self,
         input: &u64,

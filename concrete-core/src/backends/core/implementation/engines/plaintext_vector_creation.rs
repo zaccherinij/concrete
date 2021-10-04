@@ -4,6 +4,17 @@ use crate::backends::core::private::crypto::encoding::PlaintextList as ImplPlain
 use crate::specification::engines::{PlaintextVectorCreationEngine, PlaintextVectorCreationError};
 
 impl PlaintextVectorCreationEngine<u32, PlaintextVector32> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::parameters::PlaintextCount;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // Here a hard-set encoding is applied (shift by 20 bits)
+    /// let input = vec![3_u32 << 20; 3];
+    /// let plaintext_vector: PlaintextVector32 = engine.create_plaintext_vector(&input).unwrap();
+    /// assert_eq!(plaintext_vector.plaintext_count(), PlaintextCount(3));
+    /// engine.destroy(plaintext_vector).unwrap();
+    /// ```
     fn create_plaintext_vector(
         &mut self,
         input: &[u32],
@@ -20,6 +31,17 @@ impl PlaintextVectorCreationEngine<u32, PlaintextVector32> for CoreEngine {
 }
 
 impl PlaintextVectorCreationEngine<u64, PlaintextVector64> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::parameters::PlaintextCount;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // Here a hard-set encoding is applied (shift by 50 bits)
+    /// let input = vec![3_u64 << 50; 3];
+    /// let plaintext_vector: PlaintextVector64 = engine.create_plaintext_vector(&input).unwrap();
+    /// assert_eq!(plaintext_vector.plaintext_count(), PlaintextCount(3));
+    /// engine.destroy(plaintext_vector).unwrap();
+    /// ```
     fn create_plaintext_vector(
         &mut self,
         input: &[u64],
