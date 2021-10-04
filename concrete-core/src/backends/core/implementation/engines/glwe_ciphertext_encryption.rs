@@ -14,6 +14,32 @@ use crate::specification::entities::GlweSecretKeyEntity;
 impl GlweCiphertextEncryptionEngine<GlweSecretKey32, PlaintextVector32, GlweCiphertext32>
     for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::{GlweDimension, PolynomialSize};
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let glwe_dimension = GlweDimension(2);
+    /// let polynomial_size = PolynomialSize(4);
+    /// // There are always polynomial_size messages encrypted in the GLWE ciphertext
+    /// // Here a hard-set encoding is applied (shift by 20 bits)
+    /// let input = vec![3_u32 << 20; polynomial_size.0];
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: GlweSecretKey32 = engine
+    ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
+    ///     .unwrap();
+    /// let plaintext_vector = engine.create_plaintext_vector(&input).unwrap();
+    /// let ciphertext = engine
+    ///     .encrypt_glwe_ciphertext(&key, &plaintext_vector, noise)
+    ///     .unwrap();
+    /// assert_eq!(ciphertext.glwe_dimension(), glwe_dimension);
+    /// assert_eq!(ciphertext.polynomial_size(), polynomial_size);
+    /// engine.destroy(key).unwrap();
+    /// engine.destroy(plaintext_vector).unwrap();
+    /// engine.destroy(ciphertext).unwrap();
+    /// ```
     fn encrypt_glwe_ciphertext(
         &mut self,
         key: &GlweSecretKey32,
@@ -50,6 +76,32 @@ impl GlweCiphertextEncryptionEngine<GlweSecretKey32, PlaintextVector32, GlweCiph
 impl GlweCiphertextEncryptionEngine<GlweSecretKey64, PlaintextVector64, GlweCiphertext64>
     for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::{GlweDimension, PolynomialSize};
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let glwe_dimension = GlweDimension(2);
+    /// let polynomial_size = PolynomialSize(4);
+    /// // There are always polynomial_size messages encrypted in the GLWE ciphertext
+    /// // Here a hard-set encoding is applied (shift by 50 bits)
+    /// let input = vec![3_u64 << 50; polynomial_size.0];
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: GlweSecretKey64 = engine
+    ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
+    ///     .unwrap();
+    /// let plaintext_vector = engine.create_plaintext_vector(&input).unwrap();
+    /// let ciphertext = engine
+    ///     .encrypt_glwe_ciphertext(&key, &plaintext_vector, noise)
+    ///     .unwrap();
+    /// assert_eq!(ciphertext.glwe_dimension(), glwe_dimension);
+    /// assert_eq!(ciphertext.polynomial_size(), polynomial_size);
+    /// engine.destroy(key).unwrap();
+    /// engine.destroy(plaintext_vector).unwrap();
+    /// engine.destroy(ciphertext).unwrap();
+    /// ```
     fn encrypt_glwe_ciphertext(
         &mut self,
         key: &GlweSecretKey64,

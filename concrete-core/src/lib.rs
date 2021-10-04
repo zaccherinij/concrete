@@ -40,5 +40,5 @@
 //! abstract API, and navigate from there.
 
 pub mod backends;
-// pub mod prelude;
+pub mod prelude;
 pub mod specification;

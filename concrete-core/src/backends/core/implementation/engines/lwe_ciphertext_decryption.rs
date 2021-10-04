@@ -6,6 +6,28 @@ use crate::backends::core::private::crypto::encoding::Plaintext as ImplPlaintext
 use crate::specification::engines::{LweCiphertextDecryptionEngine, LweCiphertextDecryptionError};
 
 impl LweCiphertextDecryptionEngine<LweSecretKey32, LweCiphertext32, Plaintext32> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::LweDimension;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let lwe_dimension = LweDimension(2);
+    /// // Here a hard-set encoding is applied (shift by 20 bits)
+    /// let input = 3_u32 << 20;
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let plaintext = engine.create_plaintext(&input).unwrap();
+    /// let ciphertext = engine
+    ///     .encrypt_lwe_ciphertext(&key, &plaintext, noise)
+    ///     .unwrap();
+    /// let decrypted_plaintext = engine.decrypt_lwe_ciphertext(&key, &ciphertext).unwrap();
+    /// engine.destroy(key).unwrap();
+    /// engine.destroy(plaintext).unwrap();
+    /// engine.destroy(ciphertext).unwrap();
+    /// engine.destroy(decrypted_plaintext).unwrap();
+    /// ```
     fn decrypt_lwe_ciphertext(
         &mut self,
         key: &LweSecretKey32,
@@ -26,6 +48,28 @@ impl LweCiphertextDecryptionEngine<LweSecretKey32, LweCiphertext32, Plaintext32>
 }
 
 impl LweCiphertextDecryptionEngine<LweSecretKey64, LweCiphertext64, Plaintext64> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::LweDimension;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let lwe_dimension = LweDimension(2);
+    /// // Here a hard-set encoding is applied (shift by 50 bits)
+    /// let input = 3_u64 << 50;
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let plaintext = engine.create_plaintext(&input).unwrap();
+    /// let ciphertext = engine
+    ///     .encrypt_lwe_ciphertext(&key, &plaintext, noise)
+    ///     .unwrap();
+    /// let decrypted_plaintext = engine.decrypt_lwe_ciphertext(&key, &ciphertext).unwrap();
+    /// engine.destroy(key).unwrap();
+    /// engine.destroy(plaintext).unwrap();
+    /// engine.destroy(ciphertext).unwrap();
+    /// engine.destroy(decrypted_plaintext).unwrap();
+    /// ```
     fn decrypt_lwe_ciphertext(
         &mut self,
         key: &LweSecretKey64,

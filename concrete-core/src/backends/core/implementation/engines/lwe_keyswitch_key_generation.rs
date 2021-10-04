@@ -1,3 +1,6 @@
+use concrete_commons::dispersion::Variance;
+use concrete_commons::parameters::{DecompositionBaseLog, DecompositionLevelCount};
+
 use crate::backends::core::implementation::engines::CoreEngine;
 use crate::backends::core::implementation::entities::{
     LweKeyswitchKey32, LweKeyswitchKey64, LweSecretKey32, LweSecretKey64,
@@ -7,12 +10,51 @@ use crate::specification::engines::{
     LweKeyswitchKeyGenerationEngine, LweKeyswitchKeyGenerationError,
 };
 use crate::specification::entities::LweSecretKeyEntity;
-use concrete_commons::dispersion::Variance;
-use concrete_commons::parameters::{DecompositionBaseLog, DecompositionLevelCount};
 
 impl LweKeyswitchKeyGenerationEngine<LweSecretKey32, LweSecretKey32, LweKeyswitchKey32>
     for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::{
+    ///     DecompositionBaseLog, DecompositionLevelCount, LweDimension,
+    /// };
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let input_lwe_dimension = LweDimension(6);
+    /// let output_lwe_dimension = LweDimension(3);
+    /// let decomposition_level_count = DecompositionLevelCount(2);
+    /// let decomposition_base_log = DecompositionBaseLog(8);
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let input_key: LweSecretKey32 = engine.generate_lwe_secret_key(input_lwe_dimension).unwrap();
+    /// let output_key: LweSecretKey32 = engine
+    ///     .generate_lwe_secret_key(output_lwe_dimension)
+    ///     .unwrap();
+    /// let keyswitch_key = engine
+    ///     .generate_lwe_keyswitch_key(
+    ///         &input_key,
+    ///         &output_key,
+    ///         decomposition_level_count,
+    ///         decomposition_base_log,
+    ///         noise,
+    ///     )
+    ///     .unwrap();
+    /// assert_eq!(
+    ///     keyswitch_key.decomposition_level_count(),
+    ///     decomposition_level_count
+    /// );
+    /// assert_eq!(
+    ///     keyswitch_key.decomposition_base_log(),
+    ///     decomposition_base_log
+    /// );
+    /// assert_eq!(keyswitch_key.input_lwe_dimension(), input_lwe_dimension);
+    /// assert_eq!(keyswitch_key.output_lwe_dimension(), output_lwe_dimension);
+    /// engine.destroy(input_key).unwrap();
+    /// engine.destroy(output_key).unwrap();
+    /// engine.destroy(keyswitch_key).unwrap();
+    /// ```
     fn generate_lwe_keyswitch_key(
         &mut self,
         input_key: &LweSecretKey32,
@@ -60,6 +102,47 @@ impl LweKeyswitchKeyGenerationEngine<LweSecretKey32, LweSecretKey32, LweKeyswitc
 impl LweKeyswitchKeyGenerationEngine<LweSecretKey64, LweSecretKey64, LweKeyswitchKey64>
     for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::{
+    ///     DecompositionBaseLog, DecompositionLevelCount, LweDimension,
+    /// };
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let input_lwe_dimension = LweDimension(6);
+    /// let output_lwe_dimension = LweDimension(3);
+    /// let decomposition_level_count = DecompositionLevelCount(2);
+    /// let decomposition_base_log = DecompositionBaseLog(8);
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let input_key: LweSecretKey64 = engine.generate_lwe_secret_key(input_lwe_dimension).unwrap();
+    /// let output_key: LweSecretKey64 = engine
+    ///     .generate_lwe_secret_key(output_lwe_dimension)
+    ///     .unwrap();
+    /// let keyswitch_key = engine
+    ///     .generate_lwe_keyswitch_key(
+    ///         &input_key,
+    ///         &output_key,
+    ///         decomposition_level_count,
+    ///         decomposition_base_log,
+    ///         noise,
+    ///     )
+    ///     .unwrap();
+    /// assert_eq!(
+    ///     keyswitch_key.decomposition_level_count(),
+    ///     decomposition_level_count
+    /// );
+    /// assert_eq!(
+    ///     keyswitch_key.decomposition_base_log(),
+    ///     decomposition_base_log
+    /// );
+    /// assert_eq!(keyswitch_key.input_lwe_dimension(), input_lwe_dimension);
+    /// assert_eq!(keyswitch_key.output_lwe_dimension(), output_lwe_dimension);
+    /// engine.destroy(input_key).unwrap();
+    /// engine.destroy(output_key).unwrap();
+    /// engine.destroy(keyswitch_key).unwrap();
+    /// ```
     fn generate_lwe_keyswitch_key(
         &mut self,
         input_key: &LweSecretKey64,

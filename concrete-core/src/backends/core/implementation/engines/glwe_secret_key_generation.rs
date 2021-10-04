@@ -5,6 +5,21 @@ use crate::specification::engines::{GlweSecretKeyGenerationEngine, GlweSecretKey
 use concrete_commons::parameters::{GlweDimension, PolynomialSize};
 
 impl GlweSecretKeyGenerationEngine<GlweSecretKey32> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::parameters::{GlweDimension, PolynomialSize};
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let glwe_dimension = GlweDimension(2);
+    /// let polynomial_size = PolynomialSize(4);
+    /// let glwe_secret_key: GlweSecretKey32 = engine
+    ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
+    ///     .unwrap();
+    /// assert_eq!(glwe_secret_key.glwe_dimension(), glwe_dimension);
+    /// assert_eq!(glwe_secret_key.polynomial_size(), polynomial_size);
+    /// engine.destroy(glwe_secret_key).unwrap();
+    /// ```
     fn generate_glwe_secret_key(
         &mut self,
         glwe_dimension: GlweDimension,
@@ -27,6 +42,21 @@ impl GlweSecretKeyGenerationEngine<GlweSecretKey32> for CoreEngine {
 }
 
 impl GlweSecretKeyGenerationEngine<GlweSecretKey64> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::parameters::{GlweDimension, PolynomialSize};
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let glwe_dimension = GlweDimension(2);
+    /// let polynomial_size = PolynomialSize(4);
+    /// let glwe_secret_key: GlweSecretKey64 = engine
+    ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
+    ///     .unwrap();
+    /// assert_eq!(glwe_secret_key.glwe_dimension(), glwe_dimension);
+    /// assert_eq!(glwe_secret_key.polynomial_size(), polynomial_size);
+    /// engine.destroy(glwe_secret_key).unwrap();
+    /// ```
     fn generate_glwe_secret_key(
         &mut self,
         glwe_dimension: GlweDimension,

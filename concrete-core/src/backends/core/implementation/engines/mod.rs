@@ -1,3 +1,5 @@
+//! This module implements all the operations
+//! provided by the Core Engine.
 use crate::backends::core::private::crypto::secret::generators::{
     EncryptionRandomGenerator as ImplEncryptionRandomGenerator,
     SecretRandomGenerator as ImplSecretRandomGenerator,
@@ -7,12 +9,12 @@ use crate::specification::engines::AbstractEngine;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
-/// The error which can occur in the execution of fhe operations, due to the core implementation.
+/// The error which can occur in the execution of FHE operations, due to the core implementation.
 ///
 /// # Note:
 ///
 /// There is currently no such case, as the core implementation is not expected to undergo some
-/// major issues unrelated to fhe.
+/// major issues unrelated to FHE.
 #[derive(Debug)]
 pub enum CoreError {}
 impl Display for CoreError {

@@ -17,6 +17,33 @@ impl
         PlaintextVector32,
     > for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::{GlweDimension, PlaintextCount, PolynomialSize};
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let glwe_dimension = GlweDimension(2);
+    /// let polynomial_size = PolynomialSize(4);
+    /// // Here a hard-set encoding is applied (shift by 20 bits)
+    /// let input = vec![3_u32 << 20; 8];
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: GlweSecretKey32 = engine
+    ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
+    ///     .unwrap();
+    /// let mut plaintext_vector = engine.create_plaintext_vector(&input).unwrap();
+    /// let ciphertext_vector = engine
+    ///     .encrypt_glwe_ciphertext_vector(&key, &plaintext_vector, noise)
+    ///     .unwrap();
+    /// engine
+    ///     .inplace_decrypt_glwe_ciphertext_vector(&key, &mut plaintext_vector, &ciphertext_vector)
+    ///     .unwrap();
+    /// assert_eq!(plaintext_vector.plaintext_count(), PlaintextCount(8));
+    /// engine.destroy(ciphertext_vector).unwrap();
+    /// engine.destroy(plaintext_vector).unwrap();
+    /// engine.destroy(key).unwrap();
+    /// ```
     fn inplace_decrypt_glwe_ciphertext_vector(
         &mut self,
         key: &GlweSecretKey32,
@@ -53,6 +80,33 @@ impl
         PlaintextVector64,
     > for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::{GlweDimension, PlaintextCount, PolynomialSize};
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let glwe_dimension = GlweDimension(2);
+    /// let polynomial_size = PolynomialSize(4);
+    /// // Here a hard-set encoding is applied (shift by 50 bits)
+    /// let input = vec![3_u64 << 50; 8];
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: GlweSecretKey64 = engine
+    ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
+    ///     .unwrap();
+    /// let mut plaintext_vector = engine.create_plaintext_vector(&input).unwrap();
+    /// let ciphertext_vector = engine
+    ///     .encrypt_glwe_ciphertext_vector(&key, &plaintext_vector, noise)
+    ///     .unwrap();
+    /// engine
+    ///     .inplace_decrypt_glwe_ciphertext_vector(&key, &mut plaintext_vector, &ciphertext_vector)
+    ///     .unwrap();
+    /// assert_eq!(plaintext_vector.plaintext_count(), PlaintextCount(8));
+    /// engine.destroy(ciphertext_vector).unwrap();
+    /// engine.destroy(plaintext_vector).unwrap();
+    /// engine.destroy(key).unwrap();
+    /// ```
     fn inplace_decrypt_glwe_ciphertext_vector(
         &mut self,
         key: &GlweSecretKey64,

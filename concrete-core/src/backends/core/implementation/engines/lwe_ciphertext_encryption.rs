@@ -1,3 +1,5 @@
+use concrete_commons::dispersion::Variance;
+
 use crate::backends::core::implementation::engines::CoreEngine;
 use crate::backends::core::implementation::entities::{
     LweCiphertext32, LweCiphertext64, LweSecretKey32, LweSecretKey64, Plaintext32, Plaintext64,
@@ -5,9 +7,29 @@ use crate::backends::core::implementation::entities::{
 use crate::backends::core::private::crypto::lwe::LweCiphertext as ImplLweCiphertext;
 use crate::specification::engines::{LweCiphertextEncryptionEngine, LweCiphertextEncryptionError};
 use crate::specification::entities::LweSecretKeyEntity;
-use concrete_commons::dispersion::Variance;
 
 impl LweCiphertextEncryptionEngine<LweSecretKey32, Plaintext32, LweCiphertext32> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::LweDimension;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let lwe_dimension = LweDimension(2);
+    /// // Here a hard-set encoding is applied (shift by 20 bits)
+    /// let input = 3_u32 << 20;
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let plaintext = engine.create_plaintext(&input).unwrap();
+    /// let ciphertext = engine
+    ///     .encrypt_lwe_ciphertext(&key, &plaintext, noise)
+    ///     .unwrap();
+    /// assert_eq!(ciphertext.lwe_dimension(), lwe_dimension);
+    /// engine.destroy(key).unwrap();
+    /// engine.destroy(plaintext).unwrap();
+    /// engine.destroy(ciphertext).unwrap();
+    /// ```
     fn encrypt_lwe_ciphertext(
         &mut self,
         key: &LweSecretKey32,
@@ -35,6 +57,27 @@ impl LweCiphertextEncryptionEngine<LweSecretKey32, Plaintext32, LweCiphertext32>
 }
 
 impl LweCiphertextEncryptionEngine<LweSecretKey64, Plaintext64, LweCiphertext64> for CoreEngine {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::LweDimension;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let lwe_dimension = LweDimension(2);
+    /// // Here a hard-set encoding is applied (shift by 50 bits)
+    /// let input = 3_u64 << 50;
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let plaintext = engine.create_plaintext(&input).unwrap();
+    /// let ciphertext = engine
+    ///     .encrypt_lwe_ciphertext(&key, &plaintext, noise)
+    ///     .unwrap();
+    /// assert_eq!(ciphertext.lwe_dimension(), lwe_dimension);
+    /// engine.destroy(key).unwrap();
+    /// engine.destroy(plaintext).unwrap();
+    /// engine.destroy(ciphertext).unwrap();
+    /// ```
     fn encrypt_lwe_ciphertext(
         &mut self,
         key: &LweSecretKey64,

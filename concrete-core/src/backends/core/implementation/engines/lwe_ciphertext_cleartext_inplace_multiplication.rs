@@ -12,6 +12,37 @@ impl
     LweCiphertextCleartextInplaceMultiplicationEngine<LweCiphertext32, Cleartext32, LweCiphertext32>
     for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::LweDimension;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let lwe_dimension = LweDimension(2);
+    /// // Here a hard-set encoding is applied (shift by 20 bits)
+    /// let input = 3_u32 << 20;
+    /// let cleartext_input = 12_u32;
+    /// let cleartext: Cleartext32 = engine.create_cleartext(&cleartext_input).unwrap();
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let plaintext = engine.create_plaintext(&input).unwrap();
+    /// let ciphertext_1 = engine
+    ///     .encrypt_lwe_ciphertext(&key, &plaintext, noise)
+    ///     .unwrap();
+    /// let mut ciphertext_2 = engine
+    ///     .encrypt_lwe_ciphertext(&key, &plaintext, noise)
+    ///     .unwrap();
+    /// engine
+    ///     .inplace_mul_lwe_ciphertext_cleartext(&mut ciphertext_2, &ciphertext_1, &cleartext)
+    ///     .unwrap();
+    /// assert_eq!(ciphertext_2.lwe_dimension(), lwe_dimension);
+    /// engine.destroy(key).unwrap();
+    /// engine.destroy(plaintext).unwrap();
+    /// engine.destroy(ciphertext_1).unwrap();
+    /// engine.destroy(ciphertext_2).unwrap();
+    /// engine.destroy(cleartext).unwrap();
+    /// ```
     fn inplace_mul_lwe_ciphertext_cleartext(
         &mut self,
         output: &mut LweCiphertext32,
@@ -39,6 +70,37 @@ impl
     LweCiphertextCleartextInplaceMultiplicationEngine<LweCiphertext64, Cleartext64, LweCiphertext64>
     for CoreEngine
 {
+    /// # Example:
+    /// ```
+    /// use concrete_commons::dispersion::Variance;
+    /// use concrete_commons::parameters::LweDimension;
+    /// use concrete_core::prelude::*;
+    /// let mut engine = CoreEngine::new().unwrap();
+    /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
+    /// let lwe_dimension = LweDimension(2);
+    /// // Here a hard-set encoding is applied (shift by 50 bits)
+    /// let input = 3_u64 << 50;
+    /// let cleartext_input = 12_u64;
+    /// let cleartext: Cleartext64 = engine.create_cleartext(&cleartext_input).unwrap();
+    /// let noise = Variance(2_f64.powf(-25.));
+    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let plaintext = engine.create_plaintext(&input).unwrap();
+    /// let ciphertext_1 = engine
+    ///     .encrypt_lwe_ciphertext(&key, &plaintext, noise)
+    ///     .unwrap();
+    /// let mut ciphertext_2 = engine
+    ///     .encrypt_lwe_ciphertext(&key, &plaintext, noise)
+    ///     .unwrap();
+    /// engine
+    ///     .inplace_mul_lwe_ciphertext_cleartext(&mut ciphertext_2, &ciphertext_1, &cleartext)
+    ///     .unwrap();
+    /// assert_eq!(ciphertext_2.lwe_dimension(), lwe_dimension);
+    /// engine.destroy(key).unwrap();
+    /// engine.destroy(plaintext).unwrap();
+    /// engine.destroy(ciphertext_1).unwrap();
+    /// engine.destroy(ciphertext_2).unwrap();
+    /// engine.destroy(cleartext).unwrap();
+    /// ```
     fn inplace_mul_lwe_ciphertext_cleartext(
         &mut self,
         output: &mut LweCiphertext64,
