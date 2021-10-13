@@ -13,7 +13,7 @@ There is a trade-off between efficiency and correctness: generally, using a less
 parameter set (in
 terms of computation time) leads to a smaller risk of having an error during homomorphic evaluation.
 
-We propose two sets of parameters, both achieving 128-bits of security,  which offer the 
+We propose two sets of parameters, both achieving 128 bits of security,  which offer the 
 possibility to make the more convenient choice according to the use-case.
 
 
