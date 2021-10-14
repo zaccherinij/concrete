@@ -36,11 +36,11 @@ bench = false
 
 [features]
 default = ["backend_core"]
-doc = []
+_doc = []
 backend_core = []
 slow-csprng = ["concrete-csprng/slow"]
 multithread = ["rayon", "concrete-csprng/multithread"]
 
 [package.metadata.docs.rs]
-features = ["doc"]
+features = ["_doc"]
 rustdoc-args = ["--html-in-header", "katex-header.html"]
