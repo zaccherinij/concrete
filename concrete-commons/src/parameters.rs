@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct PlaintextCount(pub usize);
 
+/// The number encoder in an encoder list.
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+pub struct EncoderCount(pub usize);
+
 /// The number messages in a messages list.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct CleartextCount(pub usize);
@@ -11,6 +15,30 @@ pub struct CleartextCount(pub usize);
 /// The number of ciphertexts in a ciphertext list.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct CiphertextCount(pub usize);
+
+/// The number of ciphertexts in an lwe ciphertext list.
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+pub struct LweCiphertextCount(pub usize);
+
+/// The index of a ciphertext in an lwe ciphertext list.
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+pub struct LweCiphertextIndex(pub usize);
+
+/// The range of indices of multiple contiguous ciphertexts in an lwe ciphertext list.
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+pub struct LweCiphertextRange(pub usize, pub usize);
+
+/// The number of ciphertexts in a glwe ciphertext list.
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+pub struct GlweCiphertextCount(pub usize);
+
+/// The number of ciphertexts in a gsw ciphertext list.
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+pub struct GswCiphertextCount(pub usize);
+
+/// The number of ciphertexts in a gsw ciphertext list.
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+pub struct GgswCiphertextCount(pub usize);
 
 /// The number of scalar in an LWE mask + 1 .
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Serialize, Deserialize)]
@@ -66,6 +94,12 @@ pub struct PolynomialSize(pub usize);
 /// Assuming a polynomial list, this return the number of polynomials.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PolynomialCount(pub usize);
+
+/// The degree of a monomial.
+///
+/// Assuming a monomial $aX^N$, this returns the $N$ value.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MonomialDegree(pub usize);
 
 /// The logarithm of the base used in a decomposition.
 ///
