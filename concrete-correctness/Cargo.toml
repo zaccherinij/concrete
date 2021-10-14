@@ -1,0 +1,17 @@
+[package]
+name = "concrete-correctness"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+concrete-core = { path="../concrete-core" }
+concrete-commons = { path="../concrete-commons" }
+
+[features]
+default = ["backend_core"]
+backend_core = []
+
+[profile.release]
+opt-level = 3
+debug = true
+lto="fat"

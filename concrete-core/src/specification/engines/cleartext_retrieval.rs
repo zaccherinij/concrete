@@ -1,0 +1,34 @@
+use super::engine_error;
+use crate::specification::engines::AbstractEngine;
+use crate::specification::entities::CleartextEntity;
+
+engine_error! {
+    CleartextRetrievalError for CleartextRetrievalEngine @
+}
+
+/// A trait for engines retrieving cleartexts.
+///
+/// # Semantics
+///
+/// This [pure](super#operation-semantics) operation generates a raw value from the `cleartext`
+/// cleartext.
+///
+/// # Formal Definition
+pub trait CleartextRetrievalEngine<Cleartext, Raw>: AbstractEngine
+where
+    Cleartext: CleartextEntity,
+{
+    /// Retrieves a raw value from a cleartext.
+    fn retrieve_cleartext(
+        &mut self,
+        cleartext: &Cleartext,
+    ) -> Result<Raw, CleartextRetrievalError<Self::EngineError>>;
+
+    /// Unsafely retrieves a raw value from a cleartext.
+    ///
+    /// # Safety
+    /// For the _general_ safety concerns regarding this operation, refer to the different variants
+    /// of [`CleartextRetrievalError`]. For safety concerns _specific_ to an engine, refer to the
+    /// implementer safety section.
+    unsafe fn retrieve_cleartext_unchecked(&mut self, cleartext: &Cleartext) -> Raw;
+}
