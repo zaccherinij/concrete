@@ -81,18 +81,27 @@ fn test_keyswitch<T: UnsignedTorus + RandomGenerable<UniformMsb>>() {
     sk_after.decrypt_lwe_list(&mut dec_messages, &ciphertexts_after);
 
     // calls the NPE to find out the amount of noise after KS
-    let output_variance = npe::estimate_keyswitch_noise_lwe_to_glwe_with_constant_terms::<
-        T,
-        _,
-        _,
-        BinaryKeyKind,
-    >(dimension_before, std_input, std_ksk, base_log, level_count);
+    let output_variance = <T as npe::LWE>::key_switch(
+        dimension_before.0,
+        level_count.0,
+        base_log.0,
+        std_ksk.get_variance(),
+        std_input.get_variance(),
+    );
 
     if nb_ct.0 < 7 {
         // assert the difference between the original messages and the decrypted messages
-        assert_delta_std_dev(&messages, &dec_messages, output_variance);
+        assert_delta_std_dev(
+            &messages,
+            &dec_messages,
+            Variance::from_variance(output_variance),
+        );
     } else {
-        assert_noise_distribution(&messages, &dec_messages, output_variance);
+        assert_noise_distribution(
+            &messages,
+            &dec_messages,
+            Variance::from_variance(output_variance),
+        );
     }
 }
 
@@ -161,7 +170,7 @@ fn test_encrypt_decrypt_u64() {
 
 fn test_multisum_npe<T>()
 where
-    T: UnsignedTorus + RandomGenerable<UniformMsb> + CastFrom<usize>,
+    T: UnsignedTorus + RandomGenerable<UniformMsb> + npe::LWE + CastFrom<usize>,
 {
     //! encrypts messages, does a multisum and decrypts the result
     //! warning: std_dev is not randomized
@@ -228,15 +237,13 @@ where
     for (w, sw) in weights.iter_mut().zip(s_weights.as_tensor().iter()) {
         *w = sw.into_unsigned();
     }
-    let output_variance: Variance = npe::estimate_weighted_sum_noise::<T, _>(
-        &vec![Variance(f64::powi(std.0, 2)); nb_ct.0],
-        &weights,
-    );
+    let output_variance: f64 =
+        <T as npe::LWE>::multisum_uncorrelated(&vec![f64::powi(std.0, 2); nb_ct.0], &weights);
 
     if n_tests < 7 {
-        assert_delta_std_dev(&new_msg, &msg, output_variance);
+        assert_delta_std_dev(&new_msg, &msg, Variance::from_variance(output_variance));
     } else {
-        assert_noise_distribution(&msg, &new_msg, output_variance);
+        assert_noise_distribution(&msg, &new_msg, Variance::from_variance(output_variance));
     }
 }
 
@@ -252,7 +259,7 @@ fn test_multisum_u64() {
 
 fn test_scalar_mul<T>()
 where
-    T: UnsignedTorus + RandomGenerable<UniformMsb> + CastFrom<usize>,
+    T: UnsignedTorus + RandomGenerable<UniformMsb> + npe::LWE + CastFrom<usize>,
 {
     //! encrypts a bunch of messages, performs a scalar multiplication and decrypts them
     //! the settings are not randomized
@@ -304,15 +311,21 @@ where
     sk.decrypt_lwe_list(&mut decryptions, &ciphertext_sm);
 
     // test
-    let output_variance: Variance = npe::estimate_integer_plaintext_multiplication_noise::<T, _>(
-        Variance(f64::powi(std_dev.0, 2)),
-        weight.0,
-    );
+    let output_variance: f64 =
+        <T as npe::LWE>::single_scalar_mul(f64::powi(std_dev.0, 2), weight.0);
     if nb_ct.0 < 7 {
         // assert the difference between the original messages and the decrypted messages
-        assert_delta_std_dev(&messages_mul, &decryptions, output_variance);
+        assert_delta_std_dev(
+            &messages_mul,
+            &decryptions,
+            Variance::from_variance(output_variance),
+        );
     } else {
-        assert_noise_distribution(&messages_mul, &decryptions, output_variance);
+        assert_noise_distribution(
+            &messages_mul,
+            &decryptions,
+            Variance::from_variance(output_variance),
+        );
     }
 }
 
@@ -328,7 +341,7 @@ fn test_scalar_mul_u64() {
 
 fn test_scalar_mul_random<T>()
 where
-    T: UnsignedTorus + RandomGenerable<UniformMsb> + CastFrom<usize>,
+    T: UnsignedTorus + RandomGenerable<UniformMsb> + npe::LWE + CastFrom<usize>,
 {
     //! encrypts a bunch of messages, performs a scalar multiplication and decrypts them
     //! warning: std_dev is not randomized
@@ -402,11 +415,9 @@ where
             .zip(weights.cleartext_iter()),
     ) {
         // noise prediction work
-        let output_variance: Variance = npe::estimate_integer_plaintext_multiplication_noise::<T, _>(
-            Variance(f64::powi(std_dev.0, 2)),
-            w_i.0,
-        );
-        assert_delta_std_dev(&mm, &d, output_variance);
+        let output_variance: f64 =
+            <T as npe::LWE>::single_scalar_mul(f64::powi(std_dev.0, 2), w_i.0);
+        assert_delta_std_dev(&mm, &d, Variance::from_variance(output_variance));
     }
 }
 
