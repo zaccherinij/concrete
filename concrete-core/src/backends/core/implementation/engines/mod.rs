@@ -43,7 +43,11 @@ impl AbstractEngine for CoreEngine {
 }
 
 mod cleartext_creation;
+mod cleartext_inplace_retrieval;
+mod cleartext_retrieval;
 mod cleartext_vector_creation;
+mod cleartext_vector_inplace_retrieval;
+mod cleartext_vector_retrieval;
 mod destruction;
 mod glwe_ciphertext_decryption;
 mod glwe_ciphertext_encryption;
@@ -83,4 +87,8 @@ mod lwe_ciphertext_zero_encryption;
 mod lwe_keyswitch_key_generation;
 mod lwe_secret_key_generation;
 mod plaintext_creation;
+mod plaintext_inplace_retrieval;
+mod plaintext_retrieval;
 mod plaintext_vector_creation;
+mod plaintext_vector_inplace_retrieval;
+mod plaintext_vector_retrieval;
