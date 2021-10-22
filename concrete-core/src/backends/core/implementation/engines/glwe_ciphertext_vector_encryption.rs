@@ -22,7 +22,7 @@ impl
         noise: Variance,
     ) -> Result<GlweCiphertextVector32, GlweCiphertextVectorEncryptionError<Self::EngineError>>
     {
-        if (input.plaintext_count().0 % key.polynomial_size().0) == 0 {
+        if (input.plaintext_count().0 % key.polynomial_size().0) != 0 {
             return Err(GlweCiphertextVectorEncryptionError::PlaintextCountMismatch);
         }
         Ok(unsafe { self.encrypt_glwe_ciphertext_vector_unchecked(key, input, noise) })
@@ -61,7 +61,7 @@ impl
         noise: Variance,
     ) -> Result<GlweCiphertextVector64, GlweCiphertextVectorEncryptionError<Self::EngineError>>
     {
-        if (input.plaintext_count().0 % key.polynomial_size().0) == 0 {
+        if (input.plaintext_count().0 % key.polynomial_size().0) != 0 {
             return Err(GlweCiphertextVectorEncryptionError::PlaintextCountMismatch);
         }
         Ok(unsafe { self.encrypt_glwe_ciphertext_vector_unchecked(key, input, noise) })
