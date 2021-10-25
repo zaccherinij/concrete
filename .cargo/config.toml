@@ -1,2 +1,17 @@
 [alias]
 xtask = "run --manifest-path ./concrete-tasks/Cargo.toml --"
+
+[build]
+target-dir = "target"
+rustdocflags = ["-Zunstable-options --no-run", "--html-in-header katex-header.html"]
+
+[profile.bench]
+opt-level = 3
+debug = true
+lto="fat"
+
+[target.'cfg(target_os = "linux")']
+rustflags = ["-Ctarget-feature=+aes,+rdseed,+sse2,+avx,+avx2"]
+
+[target.'cfg(target_os = "macos")']
+rustflags = ["-Ctarget-cpu=native"]
