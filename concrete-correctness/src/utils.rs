@@ -83,7 +83,7 @@ pub fn assert_delta_std_dev<Raw>(first: &[Raw], second: &[Raw], dist: Variance)
 where
     Raw: RawUnsignedIntegers,
 {
-    for (x, y) in first.iter().zip(second.iter()) {
+    for (x, y) in first.iter().zip(second.iter()) {git
         let distance: f64 = Raw::modular_distance(*x, *y).into_f64();
         let torus_distance = distance / 2_f64.powi(Raw::BITS as i32);
         assert!(
