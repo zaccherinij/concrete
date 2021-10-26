@@ -1,6 +1,6 @@
 use super::engine_error;
 use crate::specification::engines::AbstractEngine;
-use crate::specification::entities::{PlaintextEntity, PlaintextVectorEntity};
+use crate::specification::entities::PlaintextVectorEntity;
 
 engine_error! {
     PlaintextVectorInplaceRetrievalError for PlaintextVectorInplaceRetrievalEngine @

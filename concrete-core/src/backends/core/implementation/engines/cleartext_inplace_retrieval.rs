@@ -10,7 +10,7 @@ impl CleartextInplaceRetrievalEngine<Cleartext32, u32> for CoreEngine {
         output: &mut u32,
         input: &Cleartext32,
     ) -> Result<(), CleartextInplaceRetrievalError<Self::EngineError>> {
-        unsafe { self.inplace_retrieve_cleartext(output, input) };
+        unsafe { self.inplace_retrieve_cleartext_unchecked(output, input) };
         Ok(())
     }
 
@@ -29,7 +29,7 @@ impl CleartextInplaceRetrievalEngine<Cleartext64, u64> for CoreEngine {
         output: &mut u64,
         input: &Cleartext64,
     ) -> Result<(), CleartextInplaceRetrievalError<Self::EngineError>> {
-        unsafe { self.inplace_retrieve_cleartext(output, input) };
+        unsafe { self.inplace_retrieve_cleartext_unchecked(output, input) };
         Ok(())
     }
 

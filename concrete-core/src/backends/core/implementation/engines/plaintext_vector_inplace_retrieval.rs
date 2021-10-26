@@ -15,7 +15,7 @@ impl PlaintextVectorInplaceRetrievalEngine<PlaintextVector32, u32> for CoreEngin
         if output.len() != input.plaintext_count().0 {
             return Err(PlaintextVectorInplaceRetrievalError::PlaintextCountMismatch);
         }
-        unsafe { self.inplace_retrieve_plaintext_vector(output, input) };
+        unsafe { self.inplace_retrieve_plaintext_vector_unchecked(output, input) };
         Ok(())
     }
 
@@ -37,7 +37,7 @@ impl PlaintextVectorInplaceRetrievalEngine<PlaintextVector64, u64> for CoreEngin
         if output.len() != input.plaintext_count().0 {
             return Err(PlaintextVectorInplaceRetrievalError::PlaintextCountMismatch);
         }
-        unsafe { self.inplace_retrieve_plaintext_vector(output, input) };
+        unsafe { self.inplace_retrieve_plaintext_vector_unchecked(output, input) };
         Ok(())
     }
 

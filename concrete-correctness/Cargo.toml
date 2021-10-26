@@ -6,6 +6,7 @@ edition = "2018"
 [dependencies]
 concrete-core = { path="../concrete-core" }
 concrete-commons = { path="../concrete-commons" }
+paste = "1.0.5"
 
 [features]
 default = ["backend_core"]
