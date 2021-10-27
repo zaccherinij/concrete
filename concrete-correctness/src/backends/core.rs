@@ -1,10 +1,7 @@
 use crate::generics::*;
 use crate::utils::instantiate_test;
 use concrete_core::backends::core::implementation::engines::CoreEngine;
-use concrete_core::backends::core::implementation::entities::{
-    Cleartext32, Cleartext64, CleartextVector32, CleartextVector64, GlweCiphertext32,
-    GlweCiphertext64, GlweSecretKey32, GlweSecretKey64, PlaintextVector32, PlaintextVector64,
-};
+use concrete_core::backends::core::implementation::entities::*;
 
 instantiate_test!(cleartext_creation => CoreEngine, u32, Cleartext32, CoreEngine);
 instantiate_test!(cleartext_creation => CoreEngine, u64, Cleartext64, CoreEngine);
@@ -12,3 +9,21 @@ instantiate_test!(cleartext_vector_creation => CoreEngine, u32, CleartextVector3
 instantiate_test!(cleartext_vector_creation => CoreEngine, u64, CleartextVector64, CoreEngine);
 instantiate_test!(glwe_ciphertext_decryption => CoreEngine, GlweSecretKey32, GlweCiphertext32, PlaintextVector32, CoreEngine, u32);
 instantiate_test!(glwe_ciphertext_decryption => CoreEngine, GlweSecretKey64, GlweCiphertext64, PlaintextVector64, CoreEngine, u64);
+instantiate_test!(glwe_ciphertext_encryption => CoreEngine, GlweSecretKey32, PlaintextVector32, GlweCiphertext32, CoreEngine, u32);
+instantiate_test!(glwe_ciphertext_encryption => CoreEngine, GlweSecretKey64, PlaintextVector64, GlweCiphertext64, CoreEngine, u64);
+instantiate_test!(glwe_ciphertext_inplace_decryption => CoreEngine, GlweSecretKey32, GlweCiphertext32, PlaintextVector32, CoreEngine, u32);
+instantiate_test!(glwe_ciphertext_inplace_decryption => CoreEngine, GlweSecretKey64, GlweCiphertext64, PlaintextVector64, CoreEngine, u64);
+instantiate_test!(glwe_ciphertext_inplace_encryption => CoreEngine, GlweSecretKey32, PlaintextVector32, GlweCiphertext32, CoreEngine, u32);
+instantiate_test!(glwe_ciphertext_inplace_encryption => CoreEngine, GlweSecretKey64, PlaintextVector64, GlweCiphertext64, CoreEngine, u64);
+instantiate_test!(glwe_ciphertext_vector_decryption => CoreEngine, GlweSecretKey32, GlweCiphertextVector32, PlaintextVector32, CoreEngine, u32);
+instantiate_test!(glwe_ciphertext_vector_decryption => CoreEngine, GlweSecretKey64, GlweCiphertextVector64, PlaintextVector64, CoreEngine, u64);
+instantiate_test!(glwe_ciphertext_vector_encryption => CoreEngine, GlweSecretKey32, PlaintextVector32, GlweCiphertextVector32, CoreEngine, u32);
+instantiate_test!(glwe_ciphertext_vector_encryption => CoreEngine, GlweSecretKey64, PlaintextVector64, GlweCiphertextVector64, CoreEngine, u64);
+instantiate_test!(glwe_ciphertext_vector_inplace_decryption => CoreEngine, GlweSecretKey32, GlweCiphertextVector32, PlaintextVector32, CoreEngine, u32);
+instantiate_test!(glwe_ciphertext_vector_inplace_decryption => CoreEngine, GlweSecretKey64, GlweCiphertextVector64, PlaintextVector64, CoreEngine, u64);
+instantiate_test!(glwe_ciphertext_vector_inplace_encryption => CoreEngine, GlweSecretKey32, PlaintextVector32, GlweCiphertextVector32, CoreEngine, u32);
+instantiate_test!(glwe_ciphertext_vector_inplace_encryption => CoreEngine, GlweSecretKey64, PlaintextVector64, GlweCiphertextVector64, CoreEngine, u64);
+instantiate_test!(glwe_ciphertext_vector_zero_encryption => CoreEngine, GlweSecretKey32, GlweCiphertextVector32, CoreEngine, PlaintextVector32, u32);
+instantiate_test!(glwe_ciphertext_vector_zero_encryption => CoreEngine, GlweSecretKey64, GlweCiphertextVector64, CoreEngine, PlaintextVector64, u64);
+instantiate_test!(glwe_ciphertext_zero_encryption => CoreEngine, GlweSecretKey32, GlweCiphertext32, CoreEngine, PlaintextVector32, u32);
+instantiate_test!(glwe_ciphertext_zero_encryption => CoreEngine, GlweSecretKey64, GlweCiphertext64, CoreEngine, PlaintextVector64, u64);

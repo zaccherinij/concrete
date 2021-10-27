@@ -40,6 +40,7 @@ where
     UtilRaw: RawUnsignedIntegers,
 {
     let VARIANCE = Variance(LogStandardDev::from_log_standard_dev(-20.).get_variance());
+
     let mut engine = Engine::new().unwrap();
     let mut util_engine = UtilEngine::new().unwrap();
 

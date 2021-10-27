@@ -62,7 +62,8 @@ impl
         if key.polynomial_size() != input.polynomial_size() {
             return Err(GlweCiphertextVectorInplaceDecryptionError::PolynomialSizeMismatch);
         }
-        if output.plaintext_count().0 != (key.polynomial_size().0 * key.glwe_dimension().0) {
+        if output.plaintext_count().0 != (key.polynomial_size().0 * input.glwe_ciphertext_count().0)
+        {
             return Err(GlweCiphertextVectorInplaceDecryptionError::PlaintextCountMismatch);
         }
         unsafe { self.inplace_decrypt_glwe_ciphertext_vector_unchecked(key, output, input) };
@@ -131,7 +132,8 @@ impl
         if key.polynomial_size() != input.polynomial_size() {
             return Err(GlweCiphertextVectorInplaceDecryptionError::PolynomialSizeMismatch);
         }
-        if output.plaintext_count().0 != (key.polynomial_size().0 * key.glwe_dimension().0) {
+        if output.plaintext_count().0 != (key.polynomial_size().0 * input.glwe_ciphertext_count().0)
+        {
             return Err(GlweCiphertextVectorInplaceDecryptionError::PlaintextCountMismatch);
         }
         unsafe { self.inplace_decrypt_glwe_ciphertext_vector_unchecked(key, output, input) };

@@ -21,6 +21,8 @@ pub trait RawUnsignedIntegers: Sized + PartialEq + Debug + Copy + Display {
     const BITS: usize;
     fn one() -> Self;
     fn one_vec(size: usize) -> Vec<Self>;
+    fn zero() -> Self;
+    fn zero_vec(size: usize) -> Vec<Self>;
     fn uniform() -> Self;
     fn uniform_vec(size: usize) -> Vec<Self>;
     fn into_f64(self) -> f64;
@@ -34,6 +36,12 @@ impl RawUnsignedIntegers for u32 {
     }
     fn one_vec(size: usize) -> Vec<Self> {
         vec![1u32; size]
+    }
+    fn zero() -> Self {
+        0u32
+    }
+    fn zero_vec(size: usize) -> Vec<Self> {
+        vec![0u32; size]
     }
     fn uniform() -> Self {
         let mut generator = RandomGenerator::new(None);
@@ -61,6 +69,12 @@ impl RawUnsignedIntegers for u64 {
     fn one_vec(size: usize) -> Vec<Self> {
         vec![1u64; size]
     }
+    fn zero() -> Self {
+        0u64
+    }
+    fn zero_vec(size: usize) -> Vec<Self> {
+        vec![0u64; size]
+    }
     fn uniform() -> Self {
         let mut generator = RandomGenerator::new(None);
         generator.random_uniform()
@@ -83,7 +97,7 @@ pub fn assert_delta_std_dev<Raw>(first: &[Raw], second: &[Raw], dist: Variance)
 where
     Raw: RawUnsignedIntegers,
 {
-    for (x, y) in first.iter().zip(second.iter()) {git
+    for (x, y) in first.iter().zip(second.iter()) {
         let distance: f64 = Raw::modular_distance(*x, *y).into_f64();
         let torus_distance = distance / 2_f64.powi(Raw::BITS as i32);
         assert!(
