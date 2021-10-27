@@ -21,17 +21,20 @@ impl LweKeyswitchKeyGenerationEngine<LweSecretKey32, LweSecretKey32, LweKeyswitc
     ///     DecompositionBaseLog, DecompositionLevelCount, LweDimension,
     /// };
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let input_lwe_dimension = LweDimension(6);
     /// let output_lwe_dimension = LweDimension(3);
     /// let decomposition_level_count = DecompositionLevelCount(2);
     /// let decomposition_base_log = DecompositionBaseLog(8);
     /// let noise = Variance(2_f64.powf(-25.));
-    /// let input_key: LweSecretKey32 = engine.generate_lwe_secret_key(input_lwe_dimension).unwrap();
+    /// let input_key: LweSecretKey32 = engine.generate_lwe_secret_key(input_lwe_dimension)?;
     /// let output_key: LweSecretKey32 = engine
     ///     .generate_lwe_secret_key(output_lwe_dimension)
-    ///     .unwrap();
+    ///     ?;
     /// let keyswitch_key = engine
     ///     .generate_lwe_keyswitch_key(
     ///         &input_key,
@@ -40,7 +43,7 @@ impl LweKeyswitchKeyGenerationEngine<LweSecretKey32, LweSecretKey32, LweKeyswitc
     ///         decomposition_base_log,
     ///         noise,
     ///     )
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(
     ///     keyswitch_key.decomposition_level_count(),
     ///     decomposition_level_count
@@ -51,9 +54,12 @@ impl LweKeyswitchKeyGenerationEngine<LweSecretKey32, LweSecretKey32, LweKeyswitc
     /// );
     /// assert_eq!(keyswitch_key.input_lwe_dimension(), input_lwe_dimension);
     /// assert_eq!(keyswitch_key.output_lwe_dimension(), output_lwe_dimension);
-    /// engine.destroy(input_key).unwrap();
-    /// engine.destroy(output_key).unwrap();
-    /// engine.destroy(keyswitch_key).unwrap();
+    /// engine.destroy(input_key)?;
+    /// engine.destroy(output_key)?;
+    /// engine.destroy(keyswitch_key)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn generate_lwe_keyswitch_key(
         &mut self,
@@ -109,17 +115,20 @@ impl LweKeyswitchKeyGenerationEngine<LweSecretKey64, LweSecretKey64, LweKeyswitc
     ///     DecompositionBaseLog, DecompositionLevelCount, LweDimension,
     /// };
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let input_lwe_dimension = LweDimension(6);
     /// let output_lwe_dimension = LweDimension(3);
     /// let decomposition_level_count = DecompositionLevelCount(2);
     /// let decomposition_base_log = DecompositionBaseLog(8);
     /// let noise = Variance(2_f64.powf(-25.));
-    /// let input_key: LweSecretKey64 = engine.generate_lwe_secret_key(input_lwe_dimension).unwrap();
+    /// let input_key: LweSecretKey64 = engine.generate_lwe_secret_key(input_lwe_dimension)?;
     /// let output_key: LweSecretKey64 = engine
     ///     .generate_lwe_secret_key(output_lwe_dimension)
-    ///     .unwrap();
+    ///     ?;
     /// let keyswitch_key = engine
     ///     .generate_lwe_keyswitch_key(
     ///         &input_key,
@@ -128,7 +137,7 @@ impl LweKeyswitchKeyGenerationEngine<LweSecretKey64, LweSecretKey64, LweKeyswitc
     ///         decomposition_base_log,
     ///         noise,
     ///     )
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(
     ///     keyswitch_key.decomposition_level_count(),
     ///     decomposition_level_count
@@ -139,9 +148,12 @@ impl LweKeyswitchKeyGenerationEngine<LweSecretKey64, LweSecretKey64, LweKeyswitc
     /// );
     /// assert_eq!(keyswitch_key.input_lwe_dimension(), input_lwe_dimension);
     /// assert_eq!(keyswitch_key.output_lwe_dimension(), output_lwe_dimension);
-    /// engine.destroy(input_key).unwrap();
-    /// engine.destroy(output_key).unwrap();
-    /// engine.destroy(keyswitch_key).unwrap();
+    /// engine.destroy(input_key)?;
+    /// engine.destroy(output_key)?;
+    /// engine.destroy(keyswitch_key)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn generate_lwe_keyswitch_key(
         &mut self,

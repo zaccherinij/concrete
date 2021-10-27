@@ -12,33 +12,39 @@ impl LweCiphertextInplaceAdditionEngine<LweCiphertext32, LweCiphertext32> for Co
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::LweDimension;
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(2);
     /// // Here a hard-set encoding is applied (shift by 20 bits)
     /// let input_1 = 3_u32 << 20;
     /// let input_2 = 7_u32 << 20;
     /// let noise = Variance(2_f64.powf(-25.));
-    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
-    /// let plaintext_1 = engine.create_plaintext(&input_1).unwrap();
-    /// let plaintext_2 = engine.create_plaintext(&input_2).unwrap();
+    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension)?;
+    /// let plaintext_1 = engine.create_plaintext(&input_1)?;
+    /// let plaintext_2 = engine.create_plaintext(&input_2)?;
     /// let ciphertext_1 = engine
     ///     .encrypt_lwe_ciphertext(&key, &plaintext_1, noise)
-    ///     .unwrap();
+    ///     ?;
     /// let ciphertext_2 = engine
     ///     .encrypt_lwe_ciphertext(&key, &plaintext_2, noise)
-    ///     .unwrap();
-    /// let mut ciphertext_3 = engine.zero_encrypt_lwe_ciphertext(&key, noise).unwrap();
+    ///     ?;
+    /// let mut ciphertext_3 = engine.zero_encrypt_lwe_ciphertext(&key, noise)?;
     /// engine
     ///     .inplace_add_lwe_ciphertext(&mut ciphertext_3, &ciphertext_1, &ciphertext_2)
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(ciphertext_3.lwe_dimension(), lwe_dimension);
-    /// engine.destroy(key).unwrap();
-    /// engine.destroy(plaintext_1).unwrap();
-    /// engine.destroy(plaintext_2).unwrap();
-    /// engine.destroy(ciphertext_1).unwrap();
-    /// engine.destroy(ciphertext_2).unwrap();
-    /// engine.destroy(ciphertext_3).unwrap();
+    /// engine.destroy(key)?;
+    /// engine.destroy(plaintext_1)?;
+    /// engine.destroy(plaintext_2)?;
+    /// engine.destroy(ciphertext_1)?;
+    /// engine.destroy(ciphertext_2)?;
+    /// engine.destroy(ciphertext_3)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_add_lwe_ciphertext(
         &mut self,
@@ -73,33 +79,39 @@ impl LweCiphertextInplaceAdditionEngine<LweCiphertext64, LweCiphertext64> for Co
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::LweDimension;
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(2);
     /// // Here a hard-set encoding is applied (shift by 50 bits)
     /// let input_1 = 3_u64 << 50;
     /// let input_2 = 7_u64 << 50;
     /// let noise = Variance(2_f64.powf(-25.));
-    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
-    /// let plaintext_1 = engine.create_plaintext(&input_1).unwrap();
-    /// let plaintext_2 = engine.create_plaintext(&input_2).unwrap();
+    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension)?;
+    /// let plaintext_1 = engine.create_plaintext(&input_1)?;
+    /// let plaintext_2 = engine.create_plaintext(&input_2)?;
     /// let ciphertext_1 = engine
     ///     .encrypt_lwe_ciphertext(&key, &plaintext_1, noise)
-    ///     .unwrap();
+    ///     ?;
     /// let ciphertext_2 = engine
     ///     .encrypt_lwe_ciphertext(&key, &plaintext_2, noise)
-    ///     .unwrap();
-    /// let mut ciphertext_3 = engine.zero_encrypt_lwe_ciphertext(&key, noise).unwrap();
+    ///     ?;
+    /// let mut ciphertext_3 = engine.zero_encrypt_lwe_ciphertext(&key, noise)?;
     /// engine
     ///     .inplace_add_lwe_ciphertext(&mut ciphertext_3, &ciphertext_1, &ciphertext_2)
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(ciphertext_3.lwe_dimension(), lwe_dimension);
-    /// engine.destroy(key).unwrap();
-    /// engine.destroy(plaintext_1).unwrap();
-    /// engine.destroy(plaintext_2).unwrap();
-    /// engine.destroy(ciphertext_1).unwrap();
-    /// engine.destroy(ciphertext_2).unwrap();
-    /// engine.destroy(ciphertext_3).unwrap();
+    /// engine.destroy(key)?;
+    /// engine.destroy(plaintext_1)?;
+    /// engine.destroy(plaintext_2)?;
+    /// engine.destroy(ciphertext_1)?;
+    /// engine.destroy(ciphertext_2)?;
+    /// engine.destroy(ciphertext_3)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_add_lwe_ciphertext(
         &mut self,

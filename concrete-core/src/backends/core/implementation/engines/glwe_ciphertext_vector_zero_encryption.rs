@@ -19,7 +19,10 @@ impl GlweCiphertextVectorZeroEncryptionEngine<GlweSecretKey32, GlweCiphertextVec
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::{GlweCiphertextCount, GlweDimension, PolynomialSize};
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let glwe_dimension = GlweDimension(2);
     /// let polynomial_size = PolynomialSize(1024);
@@ -27,15 +30,18 @@ impl GlweCiphertextVectorZeroEncryptionEngine<GlweSecretKey32, GlweCiphertextVec
     /// let noise = Variance(2_f64.powf(-25.));
     /// let key: GlweSecretKey32 = engine
     ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
-    ///     .unwrap();
+    ///     ?;
     /// let ciphertext_vector = engine
     ///     .zero_encrypt_glwe_ciphertext_vector(&key, noise, ciphertext_count)
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(ciphertext_vector.glwe_ciphertext_count(), ciphertext_count);
     /// assert_eq!(ciphertext_vector.polynomial_size(), polynomial_size);
     /// assert_eq!(ciphertext_vector.glwe_dimension(), glwe_dimension);
-    /// engine.destroy(ciphertext_vector).unwrap();
-    /// engine.destroy(key).unwrap();
+    /// engine.destroy(ciphertext_vector)?;
+    /// engine.destroy(key)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn zero_encrypt_glwe_ciphertext_vector(
         &mut self,
@@ -79,7 +85,10 @@ impl GlweCiphertextVectorZeroEncryptionEngine<GlweSecretKey64, GlweCiphertextVec
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::{GlweCiphertextCount, GlweDimension, PolynomialSize};
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let glwe_dimension = GlweDimension(2);
     /// let polynomial_size = PolynomialSize(1024);
@@ -87,15 +96,18 @@ impl GlweCiphertextVectorZeroEncryptionEngine<GlweSecretKey64, GlweCiphertextVec
     /// let noise = Variance(2_f64.powf(-25.));
     /// let key: GlweSecretKey64 = engine
     ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
-    ///     .unwrap();
+    ///     ?;
     /// let ciphertext_vector = engine
     ///     .zero_encrypt_glwe_ciphertext_vector(&key, noise, ciphertext_count)
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(ciphertext_vector.glwe_ciphertext_count(), ciphertext_count);
     /// assert_eq!(ciphertext_vector.polynomial_size(), polynomial_size);
     /// assert_eq!(ciphertext_vector.glwe_dimension(), glwe_dimension);
-    /// engine.destroy(ciphertext_vector).unwrap();
-    /// engine.destroy(key).unwrap();
+    /// engine.destroy(ciphertext_vector)?;
+    /// engine.destroy(key)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn zero_encrypt_glwe_ciphertext_vector(
         &mut self,

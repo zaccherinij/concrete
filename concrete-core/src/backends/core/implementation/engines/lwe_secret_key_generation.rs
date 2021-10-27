@@ -10,12 +10,18 @@ impl LweSecretKeyGenerationEngine<LweSecretKey32> for CoreEngine {
     /// ```
     /// use concrete_commons::parameters::LweDimension;
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(6);
-    /// let lwe_secret_key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let lwe_secret_key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension)?;
     /// assert_eq!(lwe_secret_key.lwe_dimension(), lwe_dimension);
-    /// engine.destroy(lwe_secret_key).unwrap();
+    /// engine.destroy(lwe_secret_key)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn generate_lwe_secret_key(
         &mut self,
@@ -40,12 +46,18 @@ impl LweSecretKeyGenerationEngine<LweSecretKey64> for CoreEngine {
     /// ```
     /// use concrete_commons::parameters::LweDimension;
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(6);
-    /// let lwe_secret_key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let lwe_secret_key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension)?;
     /// assert_eq!(lwe_secret_key.lwe_dimension(), lwe_dimension);
-    /// engine.destroy(lwe_secret_key).unwrap();
+    /// engine.destroy(lwe_secret_key)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn generate_lwe_secret_key(
         &mut self,

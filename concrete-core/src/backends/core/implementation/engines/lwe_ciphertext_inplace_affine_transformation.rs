@@ -23,7 +23,10 @@ impl
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::LweDimension;
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(2);
     /// // Here a hard-set encoding is applied (shift by 20 bits)
@@ -32,16 +35,16 @@ impl
     /// let weights_input = vec![2_u32; 8];
     /// let bias_input = 8_u32 << 20;
     /// let noise = Variance::from_variance(2_f64.powf(-25.));
-    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
-    /// let weights: CleartextVector32 = engine.create_cleartext_vector(&input_vector).unwrap();
-    /// let bias: Plaintext32 = engine.create_plaintext(&bias_input).unwrap();
+    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension)?;
+    /// let weights: CleartextVector32 = engine.create_cleartext_vector(&input_vector)?;
+    /// let bias: Plaintext32 = engine.create_plaintext(&bias_input)?;
     /// let plaintext_vector: PlaintextVector32 =
-    ///     engine.create_plaintext_vector(&input_vector).unwrap();
-    /// let plaintext: Plaintext32 = engine.create_plaintext(&input).unwrap();
+    ///     engine.create_plaintext_vector(&input_vector)?;
+    /// let plaintext: Plaintext32 = engine.create_plaintext(&input)?;
     /// let ciphertext_vector = engine
     ///     .encrypt_lwe_ciphertext_vector(&key, &plaintext_vector, noise)
-    ///     .unwrap();
-    /// let mut output_ciphertext = engine.zero_encrypt_lwe_ciphertext(&key, noise).unwrap();
+    ///     ?;
+    /// let mut output_ciphertext = engine.zero_encrypt_lwe_ciphertext(&key, noise)?;
     /// engine
     ///     .inplace_affine_transform_lwe_ciphertext(
     ///         &mut output_ciphertext,
@@ -49,15 +52,18 @@ impl
     ///         &weights,
     ///         &bias,
     ///     )
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(output_ciphertext.lwe_dimension(), lwe_dimension);
-    /// engine.destroy(key).unwrap();
-    /// engine.destroy(weights).unwrap();
-    /// engine.destroy(bias).unwrap();
-    /// engine.destroy(plaintext_vector).unwrap();
-    /// engine.destroy(plaintext).unwrap();
-    /// engine.destroy(ciphertext_vector).unwrap();
-    /// engine.destroy(output_ciphertext).unwrap();
+    /// engine.destroy(key)?;
+    /// engine.destroy(weights)?;
+    /// engine.destroy(bias)?;
+    /// engine.destroy(plaintext_vector)?;
+    /// engine.destroy(plaintext)?;
+    /// engine.destroy(ciphertext_vector)?;
+    /// engine.destroy(output_ciphertext)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_affine_transform_lwe_ciphertext(
         &mut self,
@@ -104,7 +110,10 @@ impl
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::LweDimension;
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(2);
     /// // Here a hard-set encoding is applied (shift by 20 bits)
@@ -113,16 +122,16 @@ impl
     /// let weights_input = vec![2_u64; 8];
     /// let bias_input = 8_u64 << 50;
     /// let noise = Variance::from_variance(2_f64.powf(-25.));
-    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
-    /// let weights: CleartextVector64 = engine.create_cleartext_vector(&input_vector).unwrap();
-    /// let bias: Plaintext64 = engine.create_plaintext(&bias_input).unwrap();
+    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension)?;
+    /// let weights: CleartextVector64 = engine.create_cleartext_vector(&input_vector)?;
+    /// let bias: Plaintext64 = engine.create_plaintext(&bias_input)?;
     /// let plaintext_vector: PlaintextVector64 =
-    ///     engine.create_plaintext_vector(&input_vector).unwrap();
-    /// let plaintext: Plaintext64 = engine.create_plaintext(&input).unwrap();
+    ///     engine.create_plaintext_vector(&input_vector)?;
+    /// let plaintext: Plaintext64 = engine.create_plaintext(&input)?;
     /// let ciphertext_vector = engine
     ///     .encrypt_lwe_ciphertext_vector(&key, &plaintext_vector, noise)
-    ///     .unwrap();
-    /// let mut output_ciphertext = engine.zero_encrypt_lwe_ciphertext(&key, noise).unwrap();
+    ///     ?;
+    /// let mut output_ciphertext = engine.zero_encrypt_lwe_ciphertext(&key, noise)?;
     /// engine
     ///     .inplace_affine_transform_lwe_ciphertext(
     ///         &mut output_ciphertext,
@@ -130,15 +139,18 @@ impl
     ///         &weights,
     ///         &bias,
     ///     )
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(output_ciphertext.lwe_dimension(), lwe_dimension);
-    /// engine.destroy(key).unwrap();
-    /// engine.destroy(weights).unwrap();
-    /// engine.destroy(bias).unwrap();
-    /// engine.destroy(plaintext_vector).unwrap();
-    /// engine.destroy(plaintext).unwrap();
-    /// engine.destroy(ciphertext_vector).unwrap();
-    /// engine.destroy(output_ciphertext).unwrap();
+    /// engine.destroy(key)?;
+    /// engine.destroy(weights)?;
+    /// engine.destroy(bias)?;
+    /// engine.destroy(plaintext_vector)?;
+    /// engine.destroy(plaintext)?;
+    /// engine.destroy(ciphertext_vector)?;
+    /// engine.destroy(output_ciphertext)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_affine_transform_lwe_ciphertext(
         &mut self,

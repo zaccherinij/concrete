@@ -24,18 +24,21 @@ impl
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::{LweCiphertextCount, LweDimension};
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(6);
     /// // Here a hard-set encoding is applied (shift by 20 bits)
     /// let input = vec![3_u32 << 20; 3];
     /// let noise = Variance(2_f64.powf(-25.));
-    /// let key_1: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
-    /// let plaintext_vector: PlaintextVector32 = engine.create_plaintext_vector(&input).unwrap();
+    /// let key_1: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension)?;
+    /// let plaintext_vector: PlaintextVector32 = engine.create_plaintext_vector(&input)?;
     /// let mut ciphertext_vector: LweCiphertextVector32 = engine
     ///     .encrypt_lwe_ciphertext_vector(&key_1, &plaintext_vector, noise)
-    ///     .unwrap();
-    /// let key_2: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    ///     ?;
+    /// let key_2: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension)?;
     /// engine
     ///     .inplace_encrypt_lwe_ciphertext_vector(
     ///         &key_2,
@@ -43,16 +46,19 @@ impl
     ///         &plaintext_vector,
     ///         noise,
     ///     )
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(ciphertext_vector.lwe_dimension(), lwe_dimension);
     /// assert_eq!(
     ///     ciphertext_vector.lwe_ciphertext_count(),
     ///     LweCiphertextCount(3)
     /// );
-    /// engine.destroy(ciphertext_vector).unwrap();
-    /// engine.destroy(plaintext_vector).unwrap();
-    /// engine.destroy(key_1).unwrap();
-    /// engine.destroy(key_2).unwrap();
+    /// engine.destroy(ciphertext_vector)?;
+    /// engine.destroy(plaintext_vector)?;
+    /// engine.destroy(key_1)?;
+    /// engine.destroy(key_2)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_encrypt_lwe_ciphertext_vector(
         &mut self,
@@ -99,18 +105,21 @@ impl
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::{LweCiphertextCount, LweDimension};
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(6);
     /// // Here a hard-set encoding is applied (shift by 50 bits)
     /// let input = vec![3_u64 << 50; 3];
     /// let noise = Variance(2_f64.powf(-25.));
-    /// let key_1: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
-    /// let plaintext_vector: PlaintextVector64 = engine.create_plaintext_vector(&input).unwrap();
+    /// let key_1: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension)?;
+    /// let plaintext_vector: PlaintextVector64 = engine.create_plaintext_vector(&input)?;
     /// let mut ciphertext_vector: LweCiphertextVector64 = engine
     ///     .encrypt_lwe_ciphertext_vector(&key_1, &plaintext_vector, noise)
-    ///     .unwrap();
-    /// let key_2: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    ///     ?;
+    /// let key_2: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension)?;
     /// engine.inplace_encrypt_lwe_ciphertext_vector(
     ///     &key_2,
     ///     &mut ciphertext_vector,
@@ -122,10 +131,13 @@ impl
     ///     ciphertext_vector.lwe_ciphertext_count(),
     ///     LweCiphertextCount(3)
     /// );
-    /// engine.destroy(ciphertext_vector).unwrap();
-    /// engine.destroy(plaintext_vector).unwrap();
-    /// engine.destroy(key_1).unwrap();
-    /// engine.destroy(key_2).unwrap();
+    /// engine.destroy(ciphertext_vector)?;
+    /// engine.destroy(plaintext_vector)?;
+    /// engine.destroy(key_1)?;
+    /// engine.destroy(key_2)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_encrypt_lwe_ciphertext_vector(
         &mut self,

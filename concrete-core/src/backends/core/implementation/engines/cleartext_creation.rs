@@ -7,10 +7,16 @@ impl CleartextCreationEngine<u32, Cleartext32> for CoreEngine {
     /// # Example:
     /// ```
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// let input: u32 = 3;
-    /// let cleartext: Cleartext32 = engine.create_cleartext(&input).unwrap();
-    /// engine.destroy(cleartext).unwrap();
+    /// let cleartext: Cleartext32 = engine.create_cleartext(&input)?;
+    /// engine.destroy(cleartext)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn create_cleartext(
         &mut self,
@@ -28,10 +34,16 @@ impl CleartextCreationEngine<u64, Cleartext64> for CoreEngine {
     /// # Example:
     /// ```
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// let input: u64 = 3;
-    /// let cleartext: Cleartext64 = engine.create_cleartext(&input).unwrap();
-    /// engine.destroy(cleartext).unwrap();
+    /// let cleartext: Cleartext64 = engine.create_cleartext(&input)?;
+    /// engine.destroy(cleartext)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn create_cleartext(
         &mut self,

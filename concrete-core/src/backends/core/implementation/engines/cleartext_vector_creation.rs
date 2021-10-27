@@ -8,11 +8,17 @@ impl CleartextVectorCreationEngine<u32, CleartextVector32> for CoreEngine {
     /// ```
     /// use concrete_commons::parameters::CleartextCount;
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// let input = vec![3_u32; 100];
-    /// let cleartext_vector: CleartextVector32 = engine.create_cleartext_vector(&input).unwrap();
+    /// let cleartext_vector: CleartextVector32 = engine.create_cleartext_vector(&input)?;
     /// assert_eq!(cleartext_vector.cleartext_count(), CleartextCount(100));
-    /// engine.destroy(cleartext_vector).unwrap();
+    /// engine.destroy(cleartext_vector)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn create_cleartext_vector(
         &mut self,
@@ -34,11 +40,17 @@ impl CleartextVectorCreationEngine<u64, CleartextVector64> for CoreEngine {
     /// ```
     /// use concrete_commons::parameters::CleartextCount;
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// let input = vec![3_u64; 100];
-    /// let cleartext_vector: CleartextVector64 = engine.create_cleartext_vector(&input).unwrap();
+    /// let cleartext_vector: CleartextVector64 = engine.create_cleartext_vector(&input)?;
     /// assert_eq!(cleartext_vector.cleartext_count(), CleartextCount(100));
-    /// engine.destroy(cleartext_vector).unwrap();
+    /// engine.destroy(cleartext_vector)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn create_cleartext_vector(
         &mut self,

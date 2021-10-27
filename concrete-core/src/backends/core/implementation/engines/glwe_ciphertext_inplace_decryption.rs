@@ -18,7 +18,10 @@ impl GlweCiphertextInplaceDecryptionEngine<GlweSecretKey32, GlweCiphertext32, Pl
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::{GlweDimension, PlaintextCount, PolynomialSize};
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let glwe_dimension = GlweDimension(2);
     /// let polynomial_size = PolynomialSize(4);
@@ -27,18 +30,21 @@ impl GlweCiphertextInplaceDecryptionEngine<GlweSecretKey32, GlweCiphertext32, Pl
     /// let noise = Variance(2_f64.powf(-25.));
     /// let key: GlweSecretKey32 = engine
     ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
-    ///     .unwrap();
-    /// let mut plaintext_vector = engine.create_plaintext_vector(&input).unwrap();
+    ///     ?;
+    /// let mut plaintext_vector = engine.create_plaintext_vector(&input)?;
     /// let ciphertext = engine
     ///     .encrypt_glwe_ciphertext(&key, &plaintext_vector, noise)
-    ///     .unwrap();
+    ///     ?;
     /// engine
     ///     .inplace_decrypt_glwe_ciphertext(&key, &mut plaintext_vector, &ciphertext)
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(plaintext_vector.plaintext_count(), PlaintextCount(4));
-    /// engine.destroy(ciphertext).unwrap();
-    /// engine.destroy(plaintext_vector).unwrap();
-    /// engine.destroy(key).unwrap();
+    /// engine.destroy(ciphertext)?;
+    /// engine.destroy(plaintext_vector)?;
+    /// engine.destroy(key)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_decrypt_glwe_ciphertext(
         &mut self,
@@ -77,7 +83,10 @@ impl GlweCiphertextInplaceDecryptionEngine<GlweSecretKey64, GlweCiphertext64, Pl
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::{GlweDimension, PlaintextCount, PolynomialSize};
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let glwe_dimension = GlweDimension(2);
     /// let polynomial_size = PolynomialSize(4);
@@ -86,18 +95,21 @@ impl GlweCiphertextInplaceDecryptionEngine<GlweSecretKey64, GlweCiphertext64, Pl
     /// let noise = Variance(2_f64.powf(-25.));
     /// let key: GlweSecretKey64 = engine
     ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
-    ///     .unwrap();
-    /// let mut plaintext_vector = engine.create_plaintext_vector(&input).unwrap();
+    ///     ?;
+    /// let mut plaintext_vector = engine.create_plaintext_vector(&input)?;
     /// let ciphertext = engine
     ///     .encrypt_glwe_ciphertext(&key, &plaintext_vector, noise)
-    ///     .unwrap();
+    ///     ?;
     /// engine
     ///     .inplace_decrypt_glwe_ciphertext(&key, &mut plaintext_vector, &ciphertext)
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(plaintext_vector.plaintext_count(), PlaintextCount(4));
-    /// engine.destroy(ciphertext).unwrap();
-    /// engine.destroy(plaintext_vector).unwrap();
-    /// engine.destroy(key).unwrap();
+    /// engine.destroy(ciphertext)?;
+    /// engine.destroy(plaintext_vector)?;
+    /// engine.destroy(key)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_decrypt_glwe_ciphertext(
         &mut self,

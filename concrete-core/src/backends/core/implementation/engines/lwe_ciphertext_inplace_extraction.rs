@@ -17,7 +17,10 @@ impl LweCiphertextInplaceExtractionEngine<GlweCiphertext32, LweCiphertext32> for
     ///     GlweDimension, LweDimension, MonomialDegree, PolynomialSize,
     /// };
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// // The target LWE dimension should be equal to the polynomial size + 1
     /// // since we're going to extract one sample from the GLWE ciphertext
@@ -31,25 +34,28 @@ impl LweCiphertextInplaceExtractionEngine<GlweCiphertext32, LweCiphertext32> for
     /// let noise = Variance(2_f64.powf(-25.));
     /// let glwe_key: GlweSecretKey32 = engine
     ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
-    ///     .unwrap();
-    /// let plaintext_vector = engine.create_plaintext_vector(&input).unwrap();
+    ///     ?;
+    /// let plaintext_vector = engine.create_plaintext_vector(&input)?;
     /// let glwe_ciphertext = engine
     ///     .encrypt_glwe_ciphertext(&glwe_key, &plaintext_vector, noise)
-    ///     .unwrap();
+    ///     ?;
     /// // We first create an LWE ciphertext encrypting zeros
-    /// let lwe_key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
-    /// let mut lwe_ciphertext = engine.zero_encrypt_lwe_ciphertext(&lwe_key, noise).unwrap();
+    /// let lwe_key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension)?;
+    /// let mut lwe_ciphertext = engine.zero_encrypt_lwe_ciphertext(&lwe_key, noise)?;
     /// // Then we extract the first sample from the GLWE ciphertext to store it into the LWE
-    /// let lwe_key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let lwe_key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension)?;
     /// engine
     ///     .inplace_extract_lwe_ciphertext(&mut lwe_ciphertext, &glwe_ciphertext, MonomialDegree(0))
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(lwe_ciphertext.lwe_dimension(), lwe_dimension);
-    /// engine.destroy(glwe_key).unwrap();
-    /// engine.destroy(lwe_key).unwrap();
-    /// engine.destroy(plaintext_vector).unwrap();
-    /// engine.destroy(glwe_ciphertext).unwrap();
-    /// engine.destroy(lwe_ciphertext).unwrap();
+    /// engine.destroy(glwe_key)?;
+    /// engine.destroy(lwe_key)?;
+    /// engine.destroy(plaintext_vector)?;
+    /// engine.destroy(glwe_ciphertext)?;
+    /// engine.destroy(lwe_ciphertext)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_extract_lwe_ciphertext(
         &mut self,
@@ -87,7 +93,10 @@ impl LweCiphertextInplaceExtractionEngine<GlweCiphertext64, LweCiphertext64> for
     ///     GlweDimension, LweDimension, MonomialDegree, PolynomialSize,
     /// };
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// // The target LWE dimension should be equal to the polynomial size + 1
     /// // since we're going to extract one sample from the GLWE ciphertext
@@ -101,25 +110,28 @@ impl LweCiphertextInplaceExtractionEngine<GlweCiphertext64, LweCiphertext64> for
     /// let noise = Variance(2_f64.powf(-25.));
     /// let glwe_key: GlweSecretKey64 = engine
     ///     .generate_glwe_secret_key(glwe_dimension, polynomial_size)
-    ///     .unwrap();
-    /// let plaintext_vector = engine.create_plaintext_vector(&input).unwrap();
+    ///     ?;
+    /// let plaintext_vector = engine.create_plaintext_vector(&input)?;
     /// let glwe_ciphertext = engine
     ///     .encrypt_glwe_ciphertext(&glwe_key, &plaintext_vector, noise)
-    ///     .unwrap();
+    ///     ?;
     /// // We first create an LWE ciphertext encrypting zeros
-    /// let lwe_key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
-    /// let mut lwe_ciphertext = engine.zero_encrypt_lwe_ciphertext(&lwe_key, noise).unwrap();
+    /// let lwe_key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension)?;
+    /// let mut lwe_ciphertext = engine.zero_encrypt_lwe_ciphertext(&lwe_key, noise)?;
     /// // Then we extract the first sample from the GLWE ciphertext to store it into the LWE
-    /// let lwe_key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let lwe_key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension)?;
     /// engine
     ///     .inplace_extract_lwe_ciphertext(&mut lwe_ciphertext, &glwe_ciphertext, MonomialDegree(0))
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(lwe_ciphertext.lwe_dimension(), lwe_dimension);
-    /// engine.destroy(glwe_key).unwrap();
-    /// engine.destroy(lwe_key).unwrap();
-    /// engine.destroy(plaintext_vector).unwrap();
-    /// engine.destroy(glwe_ciphertext).unwrap();
-    /// engine.destroy(lwe_ciphertext).unwrap();
+    /// engine.destroy(glwe_key)?;
+    /// engine.destroy(lwe_key)?;
+    /// engine.destroy(plaintext_vector)?;
+    /// engine.destroy(glwe_ciphertext)?;
+    /// engine.destroy(lwe_ciphertext)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn inplace_extract_lwe_ciphertext(
         &mut self,

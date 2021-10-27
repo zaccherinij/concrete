@@ -18,19 +18,25 @@ impl LweCiphertextVectorZeroEncryptionEngine<LweSecretKey32, LweCiphertextVector
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::{LweCiphertextCount, LweDimension};
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(2);
     /// let ciphertext_count = LweCiphertextCount(3);
     /// let noise = Variance(2_f64.powf(-25.));
-    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let key: LweSecretKey32 = engine.generate_lwe_secret_key(lwe_dimension)?;
     /// let ciphertext_vector = engine
     ///     .zero_encrypt_lwe_ciphertext_vector(&key, noise, ciphertext_count)
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(ciphertext_vector.lwe_dimension(), lwe_dimension);
     /// assert_eq!(ciphertext_vector.lwe_ciphertext_count(), ciphertext_count);
-    /// engine.destroy(key).unwrap();
-    /// engine.destroy(ciphertext_vector).unwrap();
+    /// engine.destroy(key)?;
+    /// engine.destroy(ciphertext_vector)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn zero_encrypt_lwe_ciphertext_vector(
         &mut self,
@@ -73,19 +79,25 @@ impl LweCiphertextVectorZeroEncryptionEngine<LweSecretKey64, LweCiphertextVector
     /// use concrete_commons::dispersion::Variance;
     /// use concrete_commons::parameters::{LweCiphertextCount, LweDimension};
     /// use concrete_core::prelude::*;
-    /// let mut engine = CoreEngine::new().unwrap();
+    /// # use std::error::Error;
+    /// #
+    /// # fn main() -> Result<(), Box<dyn Error>> {
+    /// let mut engine = CoreEngine::new()?;
     /// // DISCLAIMER: the parameters used here are only for test purpose, and not secure.
     /// let lwe_dimension = LweDimension(2);
     /// let ciphertext_count = LweCiphertextCount(3);
     /// let noise = Variance(2_f64.powf(-25.));
-    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension).unwrap();
+    /// let key: LweSecretKey64 = engine.generate_lwe_secret_key(lwe_dimension)?;
     /// let ciphertext_vector = engine
     ///     .zero_encrypt_lwe_ciphertext_vector(&key, noise, ciphertext_count)
-    ///     .unwrap();
+    ///     ?;
     /// assert_eq!(ciphertext_vector.lwe_dimension(), lwe_dimension);
     /// assert_eq!(ciphertext_vector.lwe_ciphertext_count(), ciphertext_count);
-    /// engine.destroy(key).unwrap();
-    /// engine.destroy(ciphertext_vector).unwrap();
+    /// engine.destroy(key)?;
+    /// engine.destroy(ciphertext_vector)?;
+    /// #
+    /// # Ok(())
+    /// # }
     /// ```
     fn zero_encrypt_lwe_ciphertext_vector(
         &mut self,
