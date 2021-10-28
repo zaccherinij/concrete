@@ -39,8 +39,6 @@ where
         + PlaintextVectorInplaceRetrievalEngine<PlaintextVector, UtilRaw>,
     UtilRaw: RawUnsignedIntegers,
 {
-    let VARIANCE = Variance(LogStandardDev::from_log_standard_dev(-20.).get_variance());
-
     let mut engine = Engine::new().unwrap();
     let mut util_engine = UtilEngine::new().unwrap();
 
@@ -71,6 +69,9 @@ where
         assert_delta_std_dev(&inputs, &outputs, VARIANCE);
     }
 }
+
+/// The variance used to encrypt everything in the test (log std = -20)
+const VARIANCE: Variance = Variance(0.0000000000009094947017729282);
 
 /// The parameters the test is executed against.
 const PARAMETERS: [(GlweDimension, PolynomialSize, CiphertextCount); 1] =

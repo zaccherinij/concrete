@@ -6,7 +6,9 @@ edition = "2018"
 [dependencies]
 concrete-core = { path="../concrete-core" }
 concrete-commons = { path="../concrete-commons" }
+concrete-npe = {path="../concrete-npe"}
 paste = "1.0.5"
+kolmogorov_smirnov = "1.1.0"
 
 [features]
 default = ["backend_core"]
