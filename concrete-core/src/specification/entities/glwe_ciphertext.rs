@@ -9,6 +9,9 @@ use concrete_commons::parameters::{GlweDimension, PolynomialSize};
 /// key it was encrypted with.
 ///
 /// # Formal Definition
+///
+/// Despite the fact that the GLWE scheme theoretically encompass the LWE scheme, in `concrete`, we forbid the
+/// use of GLWE ciphertext entities to represent encryption of polynomials of size zero.
 pub trait GlweCiphertextEntity: AbstractEntity<Kind = GlweCiphertextKind> {
     /// The flavor of key the ciphertext was encrypted with.
     type KeyFlavor: KeyFlavorMarker;
