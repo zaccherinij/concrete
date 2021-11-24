@@ -543,6 +543,12 @@ unsafe fn encrypt_lwe<T: UnsignedTorus>(
     let secret_key = secret_key.as_ref().unwrap();
     let ciphertext = ciphertext.as_mut().unwrap();
     let generator = generator.as_mut().unwrap();
+
+    assert_eq!(
+        secret_key.0.as_tensor().len() + 1,
+        ciphertext.0.as_tensor().len()
+    );
+
     secret_key
         .0
         .encrypt_lwe(&mut ciphertext.0, &input, noise, &mut generator.0);
@@ -586,6 +592,12 @@ unsafe fn decrypt_lwe<T: UnsignedTorus>(
     let secret_key = secret_key.as_ref().unwrap();
     let ciphertext = ciphertext.as_ref().unwrap();
     let output = output.as_mut().unwrap();
+
+    assert_eq!(
+        secret_key.0.as_tensor().len() + 1,
+        ciphertext.0.as_tensor().len()
+    );
+
     secret_key.0.decrypt_lwe(output, &ciphertext.0);
     set_err!(err, ERR_NO_ERR);
 }
@@ -825,6 +837,49 @@ pub unsafe extern "C" fn fill_lwe_secret_key_with_glwe_secret_key_u64(
 ) {
     fill_lwe_secret_key_with_glwe_secret_key(err, lwe_sk, glwe_sk);
 }
+
+unsafe fn fill_glwe_secret_key_with_lwe_secret_key<T: UnsignedTorus>(
+    err: *mut c_int,
+    glwe_sk: *mut GlweSecretKey<T>,
+    lwe_sk: *const LweSecretKey<T>,
+) {
+    if pointers_null!(lwe_sk, glwe_sk) {
+        set_err!(err, ERR_NULL_POINTER);
+        return;
+    }
+    let glwe_sk = glwe_sk.as_mut().unwrap();
+    let lwe_sk = lwe_sk.as_ref().unwrap();
+    if glwe_sk.0.as_tensor().len() != lwe_sk.0.as_tensor().len() {
+        set_err!(err, ERR_SIZE_MISMATCH);
+        return;
+    }
+    glwe_sk
+        .0
+        .as_mut_tensor()
+        .as_mut_slice()
+        .copy_from_slice(lwe_sk.0.as_tensor().as_slice());
+
+    set_err!(err, ERR_NO_ERR);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn fill_glwe_secret_key_with_lwe_secret_key_u32(
+    err: *mut c_int,
+    glwe_sk: *mut GlweSecretKey<u32>,
+    lwe_sk: *const LweSecretKey<u32>,
+) {
+    fill_glwe_secret_key_with_lwe_secret_key(err, glwe_sk, lwe_sk);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn fill_glwe_secret_key_with_lwe_secret_key_u64(
+    err: *mut c_int,
+    glwe_sk: *mut GlweSecretKey<u64>,
+    lwe_sk: *const LweSecretKey<u64>,
+) {
+    fill_glwe_secret_key_with_lwe_secret_key(err, glwe_sk, lwe_sk);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 pub struct LweKeyswitchKey<T: UnsignedTorus>(CoreLweKeyswitchKey<Vec<T>>);
@@ -1047,15 +1102,15 @@ pub unsafe extern "C" fn allocate_lwe_bootstrap_key_u32(
 unsafe fn copy_lwe_bootstrap_key<T: UnsignedTorus>(
     err: *mut c_int,
     output: *mut LweBootstrapKey<T>,
-    input: *const LweBootstrapKey<T>
-){
+    input: *const LweBootstrapKey<T>,
+) {
     if pointers_null!(input, output) {
         set_err!(err, ERR_NULL_POINTER);
         return;
     }
     let input = input.as_ref().unwrap();
     let output = output.as_mut().unwrap();
-    if input.0.as_tensor().len() != output.0.as_tensor().len(){
+    if input.0.as_tensor().len() != output.0.as_tensor().len() {
         set_err!(err, ERR_SIZE_MISMATCH);
         return;
     }
@@ -1067,8 +1122,8 @@ unsafe fn copy_lwe_bootstrap_key<T: UnsignedTorus>(
 pub unsafe extern "C" fn copy_lwe_bootstrap_key_u64(
     err: *mut c_int,
     output: *mut LweBootstrapKey<u64>,
-    input: *const LweBootstrapKey<u64>
-){
+    input: *const LweBootstrapKey<u64>,
+) {
     copy_lwe_bootstrap_key(err, output, input);
 }
 
@@ -1076,8 +1131,8 @@ pub unsafe extern "C" fn copy_lwe_bootstrap_key_u64(
 pub unsafe extern "C" fn copy_lwe_bootstrap_key_u32(
     err: *mut c_int,
     output: *mut LweBootstrapKey<u32>,
-    input: *const LweBootstrapKey<u32>
-){
+    input: *const LweBootstrapKey<u32>,
+) {
     copy_lwe_bootstrap_key(err, output, input);
 }
 
@@ -1097,6 +1152,19 @@ unsafe fn fill_lwe_bootstrap_key<T: UnsignedTorus>(
     let lwe_key = lwe_key.as_ref().unwrap();
     let glwe_key = glwe_key.as_ref().unwrap();
     let generator = generator.as_mut().unwrap();
+
+    assert_eq!(
+        glwe_key.0.key_size().to_glwe_size(),
+        fourier_bootstrap_key.0.glwe_size()
+    );
+
+    assert_eq!(
+        glwe_key.0.polynomial_size(),
+        fourier_bootstrap_key.0.polynomial_size()
+    );
+
+    assert_eq!(lwe_key.0.key_size(), fourier_bootstrap_key.0.key_size());
+
     let mut standard_bootstrap_key = CoreStandardBootstrapKey::allocate(
         T::ZERO,
         fourier_bootstrap_key.0.glwe_size(),
@@ -1156,6 +1224,9 @@ unsafe fn bootstrap_lwe<T: UnsignedTorus>(
     let output_ciphertext = output_ciphertext.as_mut().unwrap();
     let input_ciphertext = input_ciphertext.as_ref().unwrap();
     let accumulator = accumulator.as_mut().unwrap();
+
+    assert_eq!(bootstrap_key.0.glwe_size(), accumulator.0.size());
+
     bootstrap_key.0.bootstrap(
         &mut output_ciphertext.0,
         &input_ciphertext.0,
