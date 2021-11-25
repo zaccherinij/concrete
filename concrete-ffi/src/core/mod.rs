@@ -942,6 +942,14 @@ unsafe fn fill_lwe_keyswitch_key<T: UnsignedTorus>(
     let input_key = input_key.as_ref().unwrap();
     let output_key = output_key.as_ref().unwrap();
     let generator = generator.as_mut().unwrap();
+
+    assert_eq!(input_key.0.key_size(), keyswitch_key.0.before_key_size());
+
+    assert_eq!(
+        output_key.0.key_size(),
+        keyswitch_key.0.lwe_size().to_lwe_dimension()
+    );
+
     keyswitch_key
         .0
         .fill_with_keyswitch_key(&input_key.0, &output_key.0, noise, &mut generator.0);
@@ -985,6 +993,14 @@ unsafe fn keyswitch_lwe<T: UnsignedTorus>(
     let keyswitch_key = keyswitch_key.as_ref().unwrap();
     let output_ciphertext = output_ciphertext.as_mut().unwrap();
     let input_ciphertext = input_ciphertext.as_ref().unwrap();
+
+    assert_eq!(
+        input_ciphertext.0.lwe_size(),
+        keyswitch_key.0.before_key_size().to_lwe_size()
+    );
+
+    assert_eq!(output_ciphertext.0.lwe_size(), keyswitch_key.0.lwe_size());
+
     keyswitch_key
         .0
         .keyswitch_ciphertext(&mut output_ciphertext.0, &input_ciphertext.0);
