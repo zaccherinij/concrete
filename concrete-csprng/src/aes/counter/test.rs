@@ -1,5 +1,9 @@
 use super::*;
-use crate::AesKey;
+use crate::aes::counter::state::ByteCtr;
+use crate::aes::encryptors::AesCtr;
+use crate::generator::RandomBytesGenerator;
+use crate::seeders::Seeder;
+use crate::{AesKey, DevRandom};
 use rand::Rng;
 
 #[test]
@@ -7,11 +11,9 @@ fn test_gen_byte_incr() {
     // Checks that the byte counter is correctly incremented.
     for _ in 0..1000 {
         let state = rand::thread_rng().gen::<u128>();
-        let mut a = SoftAesCtrGenerator::new(
-            Some(AesKey(0)),
-            Some(State::from_aes_counter(AesCtr(state))),
-            None,
-        );
+        let mut a =
+            SoftAesCtrGenerator::try_with_state(AesKey(0), State::from(AesCtr(state)), None)
+                .unwrap();
         assert_eq!(
             *a.get_state(),
             State {
@@ -35,11 +37,9 @@ fn test_gen_aes_incr() {
     // Checks that the aes counter is correctly incremented.
     for _ in 0..1000 {
         let state = rand::thread_rng().gen::<u128>();
-        let mut a = SoftAesCtrGenerator::new(
-            Some(AesKey(0)),
-            Some(State::from_aes_counter(AesCtr(state))),
-            None,
-        );
+        let mut a =
+            SoftAesCtrGenerator::try_with_state(AesKey(0), State::from(AesCtr(state)), None)
+                .unwrap();
         assert_eq!(
             *a.get_state(),
             State {
@@ -72,8 +72,11 @@ fn test_gen_aes_incr() {
 fn test_state_fork_initial_batch() {
     // Checks that forking the prng into children that spawns the initial batch gives the
     // correct states.
-    let state = State::from_aes_counter(AesCtr(0));
-    let mut generator = SoftAesCtrGenerator::new(None, Some(state), None);
+    let state = State::from(AesCtr(0));
+    let key = DevRandom::try_new(None)
+        .and_then(|mut s| s.seed_key())
+        .unwrap();
+    let mut generator = SoftAesCtrGenerator::try_with_state(key, state, None).unwrap();
     assert_eq!(
         *generator.get_state(),
         State {
@@ -191,8 +194,11 @@ fn test_state_fork_initial_batch() {
 fn test_state_fork_next_batch() {
     // Checks that forking the prng into children that spawns the next batch gives the
     // correct states.
-    let state = State::from_aes_counter(AesCtr(0));
-    let mut generator = SoftAesCtrGenerator::new(None, Some(state), None);
+    let state = State::from(AesCtr(0));
+    let key = DevRandom::try_new(None)
+        .and_then(|mut s| s.seed_key())
+        .unwrap();
+    let mut generator = SoftAesCtrGenerator::try_with_state(key, state, None).unwrap();
     assert_eq!(
         *generator.get_state(),
         State {
@@ -397,18 +403,20 @@ fn test_randomized_fork_generation() {
     // Checks that whatever the fork, whatever the state, children generate the same outputs
     // sequence as parent, and that parent recover at the proper position.
     for _ in 0..100 {
-        let state = State::from_aes_counter(AesCtr(rand::thread_rng().gen()));
+        let state = State::from(AesCtr(rand::thread_rng().gen()));
         let n_child = ChildCount(rand::thread_rng().gen::<usize>() % 200);
         let bytes_child = BytesPerChild(rand::thread_rng().gen::<usize>() % 200);
         let key = AesKey(rand::thread_rng().gen());
-        let mut generator = SoftAesCtrGenerator::new(Some(key), Some(state.clone()), None);
+        let mut generator = SoftAesCtrGenerator::try_with_state(key, state, None).unwrap();
         let n_to_gen = n_child.0 * bytes_child.0;
-        let initial_output: Vec<u8> = (0..n_to_gen).map(|_| generator.generate_next()).collect();
-        let mut forking_generator = SoftAesCtrGenerator::new(Some(key), Some(state), None);
+        let initial_output: Vec<u8> = (0..n_to_gen)
+            .map(|_| generator.generate_next().unwrap())
+            .collect();
+        let mut forking_generator = SoftAesCtrGenerator::try_with_state(key, state, None).unwrap();
         let children_output: Vec<u8> = forking_generator
             .try_fork(n_child, bytes_child)
             .unwrap()
-            .map(|mut child| (0..bytes_child.0).map(move |_| child.generate_next()))
+            .map(|mut child| (0..bytes_child.0).map(move |_| child.generate_next().unwrap()))
             .flatten()
             .collect();
         assert_eq!(initial_output, children_output);
@@ -419,11 +427,11 @@ fn test_randomized_fork_generation() {
 #[test]
 fn test_randomized_remaining_bytes() {
     for _ in 0..1000 {
-        let state = State::from_aes_counter(AesCtr(rand::thread_rng().gen()));
+        let state = State::from(AesCtr(rand::thread_rng().gen()));
         let n_child = ChildCount(rand::thread_rng().gen::<usize>() % 200);
         let bytes_child = BytesPerChild(rand::thread_rng().gen::<usize>() % 200);
         let key = AesKey(rand::thread_rng().gen());
-        let mut forking_generator = SoftAesCtrGenerator::new(Some(key), Some(state), None);
+        let mut forking_generator = SoftAesCtrGenerator::try_with_state(key, state, None).unwrap();
         forking_generator
             .try_fork(n_child, bytes_child)
             .unwrap()
