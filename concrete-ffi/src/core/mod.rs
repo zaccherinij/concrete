@@ -26,6 +26,7 @@ use concrete_core::math::polynomial::{MonomialDegree, Polynomial};
 use concrete_core::math::tensor::{AsMutSlice, AsMutTensor, AsRefSlice, AsRefTensor};
 use concrete_core::math::torus::UnsignedTorus;
 use std::os::raw::c_int;
+use std::sync::Arc;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1038,7 +1039,7 @@ pub unsafe extern "C" fn free_lwe_keyswitch_key_u64(
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-pub struct LweBootstrapKey<T: UnsignedTorus>(CoreFourierBootstrapKey<AlignedVec<Complex64>, T>);
+pub struct LweBootstrapKey<T: UnsignedTorus>(CoreFourierBootstrapKey<Arc<AlignedVec<Complex64>>, T>);
 
 unsafe fn allocate_lwe_bootstrap_key<T: UnsignedTorus>(
     err: *mut c_int,
@@ -1097,6 +1098,36 @@ pub unsafe extern "C" fn allocate_lwe_bootstrap_key_u32(
         lwe_size,
         poly_size,
     )
+}
+
+unsafe fn clone_lwe_bootstrap_key<T: UnsignedTorus>(
+    err: *mut c_int,
+    input: *const LweBootstrapKey<T>,
+) -> *mut LweBootstrapKey<T> {
+    if pointers_null!(input) {
+        set_err!(err, ERR_NULL_POINTER);
+        return std::ptr::null_mut();
+    }
+    let input = input.as_ref().unwrap();
+    set_err!(err, ERR_NO_ERR);
+    let output = LweBootstrapKey(input.0.to_owned());
+    boxmut!(output)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn clone_lwe_bootstrap_key_u32(
+    err: *mut c_int,
+    input: *const LweBootstrapKey<u32>,
+) -> *mut LweBootstrapKey<u32> {
+    clone_lwe_bootstrap_key(err, input)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn clone_lwe_bootstrap_key_u64(
+    err: *mut c_int,
+    input: *const LweBootstrapKey<u64>,
+) -> *mut LweBootstrapKey<u64> {
+    clone_lwe_bootstrap_key(err, input)
 }
 
 unsafe fn copy_lwe_bootstrap_key<T: UnsignedTorus>(

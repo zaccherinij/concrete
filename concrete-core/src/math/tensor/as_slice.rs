@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use concrete_fftw::array::AlignedVec;
 
 /// A trait allowing to extract a slice from a tensor.
@@ -76,6 +77,14 @@ impl<Element> AsRefSlice for AlignedVec<Element> {
     }
 }
 
+impl<Element> AsRefSlice for Arc<AlignedVec<Element>>{
+    type Element = Element;
+
+    fn as_slice(&self) -> &[Self::Element] {
+        AlignedVec::as_slice(self)
+    }
+}
+
 /// A trait allowing to extract a mutable slice from a tensor.
 ///
 /// The logic is the same as for the `AsRefTensor`, but here, it allows to access mutable slices
@@ -113,5 +122,13 @@ impl<Element> AsMutSlice for AlignedVec<Element> {
     type Element = Element;
     fn as_mut_slice(&mut self) -> &mut [Element] {
         self.as_slice_mut()
+    }
+}
+
+impl<Element> AsMutSlice for Arc<AlignedVec<Element>>{
+    type Element = Element;
+
+    fn as_mut_slice(&mut self) -> &mut [<Self as AsMutSlice>::Element] {
+        AlignedVec::as_slice_mut(unsafe{Arc::get_mut_unchecked(self)})
     }
 }

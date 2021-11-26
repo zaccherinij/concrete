@@ -22,6 +22,7 @@ use concrete_commons::parameters::{
     DecompositionBaseLog, DecompositionLevelCount, GlweSize, LweDimension, PolynomialSize,
 };
 use std::marker::PhantomData;
+use std::sync::Arc;
 
 #[cfg(test)]
 mod tests;
@@ -56,7 +57,7 @@ where
     rounded_buffer: RefCell<GlweCiphertext<Vec<Scalar>>>,
 }
 
-impl<Scalar> FourierBootstrapKey<AlignedVec<Complex64>, Scalar>
+impl<Scalar> FourierBootstrapKey<Arc<AlignedVec<Complex64>>, Scalar>
 where
     Scalar: UnsignedTorus,
 {
@@ -111,6 +112,7 @@ where
         let lut_buffer = RefCell::new(GlweCiphertext::allocate(Scalar::ZERO, poly_size, glwe_size));
         let rounded_buffer =
             RefCell::new(GlweCiphertext::allocate(Scalar::ZERO, poly_size, glwe_size));
+        let tensor = Tensor::from_container(Arc::new(tensor.into_container()));
         FourierBootstrapKey {
             tensor,
             poly_size,
