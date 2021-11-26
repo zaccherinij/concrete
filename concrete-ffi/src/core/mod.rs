@@ -1055,7 +1055,9 @@ pub unsafe extern "C" fn free_lwe_keyswitch_key_u64(
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-pub struct LweBootstrapKey<T: UnsignedTorus>(CoreFourierBootstrapKey<Arc<AlignedVec<Complex64>>, T>);
+pub struct LweBootstrapKey<T: UnsignedTorus>(
+    CoreFourierBootstrapKey<Arc<AlignedVec<Complex64>>, T>,
+);
 
 unsafe fn allocate_lwe_bootstrap_key<T: UnsignedTorus>(
     err: *mut c_int,
@@ -1554,4 +1556,93 @@ pub unsafe extern "C" fn foreign_plaintext_list_u64(
     size: usize,
 ) -> *mut ForeignPlaintextList<u64> {
     foreign_plaintext_list(err, ptr, size)
+}
+
+#[repr(C)]
+pub struct Buffer {
+    pointer: *mut u8,
+    length: usize,
+}
+
+#[repr(C)]
+pub struct BufferView {
+    pointer: *const u8,
+    length: usize,
+}
+
+impl From<Vec<u8>> for Buffer {
+    fn from(a: Vec<u8>) -> Self {
+        let a = a.leak();
+
+        Self {
+            pointer: a.as_mut_ptr(),
+            length: a.len(),
+        }
+    }
+}
+
+impl Into<&[u8]> for BufferView {
+    fn into(self) -> &'static [u8] {
+        unsafe { std::slice::from_raw_parts(self.pointer, self.length) }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn serialize_lwe_bootstrap_key_u64(
+    bootstrap_key: *const LweBootstrapKey<u64>,
+) -> Buffer {
+    let pbsk = &bootstrap_key.as_ref().unwrap().0;
+
+    bincode::serialize(&pbsk).unwrap().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn deserialize_lwe_bootstrap_key_u64(
+    buffer: BufferView,
+) -> *mut LweBootstrapKey<u64> {
+    let a: CoreFourierBootstrapKey<Arc<AlignedVec<Complex64>>, u64> =
+        bincode::deserialize(buffer.into()).unwrap();
+
+    let b = LweBootstrapKey(a);
+
+    boxmut!(b)
+}
+#[no_mangle]
+pub unsafe extern "C" fn serialize_lwe_keyswitching_key_u64(
+    keyswitching_key: *const LweKeyswitchKey<u64>,
+) -> Buffer {
+    let keyswitching_key = &keyswitching_key.as_ref().unwrap().0;
+
+    bincode::serialize(&keyswitching_key).unwrap().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn deserialize_lwe_keyswitching_key_u64(
+    buffer: BufferView,
+) -> *mut LweKeyswitchKey<u64> {
+    let a: CoreLweKeyswitchKey<Vec<u64>> = bincode::deserialize(buffer.into()).unwrap();
+
+    let b = LweKeyswitchKey(a);
+
+    boxmut!(b)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn serialize_lwe_secret_key_u64(
+    secret_key: *const LweSecretKey<u64>,
+) -> Buffer {
+    let secret_key = &secret_key.as_ref().unwrap().0;
+
+    bincode::serialize(&secret_key).unwrap().into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn deserialize_lwe_secret_key_u64(
+    buffer: BufferView,
+) -> *mut LweSecretKey<u64> {
+    let a: CoreLweSecretKey<BinaryKeyKind, Vec<u64>> = bincode::deserialize(buffer.into()).unwrap();
+
+    let b = LweSecretKey(a);
+
+    boxmut!(b)
 }

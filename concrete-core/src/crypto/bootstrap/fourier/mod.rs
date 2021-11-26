@@ -847,6 +847,36 @@ where
     }
 }
 
+impl<Scalar> Serialize for FourierBootstrapKey<Arc<AlignedVec<Complex64>>, Scalar>
+where
+    Scalar: UnsignedTorus,
+{
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let surrogate = self.as_surrogate();
+        Serialize::serialize(&surrogate, serializer)
+    }
+}
+
+impl<'de, Scalar> Deserialize<'de> for FourierBootstrapKey<Arc<AlignedVec<Complex64>>, Scalar>
+where
+    Scalar: UnsignedTorus,
+{
+    fn deserialize<D>(
+        deserializer: D,
+    ) -> Result<FourierBootstrapKey<Arc<AlignedVec<Complex64>>, Scalar>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let surrogate = <SurrogateBsk<AlignedVec<Complex64>, Scalar> as Deserialize>::deserialize(
+            deserializer,
+        )?;
+        Ok(surrogate.into_arc_fourier_bsk())
+    }
+}
+
 impl<Cont, Scalar> PartialEq for FourierBootstrapKey<Cont, Scalar>
 where
     Cont: PartialEq + AsRefSlice<Element = Complex64>,

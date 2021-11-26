@@ -8,6 +8,7 @@ use concrete_commons::parameters::{
 use concrete_fftw::array::AlignedVec;
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
+use std::sync::Arc;
 
 /// Represents the kind of a bsk.
 #[derive(Serialize, Deserialize, PartialEq)]
@@ -38,6 +39,22 @@ where
     pub fn into_fourier_bsk(self) -> FourierBootstrapKey<AlignedVec<Complex64>, Scalar> {
         FourierBootstrapKey::from_container(
             self.tensor.into_container(),
+            self.glwe_size,
+            self.poly_size,
+            self.decomp_level,
+            self.decomp_base_log,
+        )
+    }
+}
+
+impl<Scalar> SurrogateBsk<AlignedVec<Complex64>, Scalar>
+where
+    Scalar: UnsignedTorus,
+{
+    /// Turns this surrogate bsk into a fresh fourier bootstrap key.
+    pub fn into_arc_fourier_bsk(self) -> FourierBootstrapKey<Arc<AlignedVec<Complex64>>, Scalar> {
+        FourierBootstrapKey::from_container(
+            Arc::new(self.tensor.into_container()),
             self.glwe_size,
             self.poly_size,
             self.decomp_level,
