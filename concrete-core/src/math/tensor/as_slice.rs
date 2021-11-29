@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use concrete_fftw::array::AlignedVec;
+use std::sync::Arc;
 
 /// A trait allowing to extract a slice from a tensor.
 ///
@@ -77,7 +77,7 @@ impl<Element> AsRefSlice for AlignedVec<Element> {
     }
 }
 
-impl<Element> AsRefSlice for Arc<AlignedVec<Element>>{
+impl<Element> AsRefSlice for Arc<AlignedVec<Element>> {
     type Element = Element;
 
     fn as_slice(&self) -> &[Self::Element] {
@@ -125,10 +125,10 @@ impl<Element> AsMutSlice for AlignedVec<Element> {
     }
 }
 
-impl<Element> AsMutSlice for Arc<AlignedVec<Element>>{
+impl<Element> AsMutSlice for Arc<AlignedVec<Element>> {
     type Element = Element;
 
     fn as_mut_slice(&mut self) -> &mut [<Self as AsMutSlice>::Element] {
-        AlignedVec::as_slice_mut(unsafe{Arc::get_mut_unchecked(self)})
+        AlignedVec::as_slice_mut(Arc::get_mut(self).unwrap())
     }
 }

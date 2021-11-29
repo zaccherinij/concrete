@@ -1,4 +1,3 @@
-#![feature(get_mut_unchecked)]
 #![deny(rustdoc::broken_intra_doc_links)]
 //! Low-overhead fhe library.
 //!
