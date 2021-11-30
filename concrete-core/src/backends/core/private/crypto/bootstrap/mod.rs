@@ -3,116 +3,70 @@
 //! The bootstrapping operation allows to reduce the level of noise in an LWE ciphertext, while
 //! evaluating an univariate function.
 
+use concrete_commons::parameters::{GlweSize, PolynomialSize};
+use concrete_fftw::array::AlignedVec;
 pub use fourier::FourierBootstrapKey;
 pub use standard::StandardBootstrapKey;
 
 use crate::backends::core::private::crypto::glwe::GlweCiphertext;
-use crate::backends::core::private::crypto::lwe::LweCiphertext;
-use crate::backends::core::private::math::tensor::{AsMutTensor, AsRefTensor};
+use crate::backends::core::private::math::fft::{Complex64, Fft, FourierPolynomial};
+use crate::backends::core::private::math::tensor::Tensor;
 use crate::backends::core::private::math::torus::UnsignedTorus;
+use crate::prelude::LweBootstrapKeyEntity;
 
 mod fourier;
 mod standard;
-mod surrogate;
+// mod surrogate;
 
-/// A trait for bootstrap keys types performing a bootstrap operation.
-pub trait Bootstrap {
-    /// The types of data used in the bootstrapped ciphertexts.
-    type CiphertextScalar: UnsignedTorus;
+#[derive(Debug, Clone)]
+pub struct FftBuffers {
+    // The fft plan is stored here. This way, we don't pay the price of allocating it every
+    // time we need to bootstrap with the same key.
+    fft: Fft,
+    // The buffers used to perform the fft are also stored in the bootstrap key. Again, the same
+    // logic apply, and we don't have to allocate them multiple times.
+    first_buffer: FourierPolynomial<AlignedVec<Complex64>>,
+    second_buffer: FourierPolynomial<AlignedVec<Complex64>>,
+    output_buffer: Tensor<AlignedVec<Complex64>>,
+}
 
-    /// Performs a bootstrap of an lwe ciphertext, with a given accumulator.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use concrete_commons::dispersion::LogStandardDev;
-    /// use concrete_commons::numeric::CastInto;
-    /// use concrete_commons::parameters::{
-    ///     DecompositionBaseLog, DecompositionLevelCount, GlweDimension, LweDimension, LweSize,
-    ///     PolynomialSize,
-    /// };
-    /// use concrete_core::backends::core::private::crypto::bootstrap::{
-    ///     Bootstrap, FourierBootstrapKey, StandardBootstrapKey,
-    /// };
-    /// use concrete_core::backends::core::private::crypto::encoding::Plaintext;
-    /// use concrete_core::backends::core::private::crypto::glwe::GlweCiphertext;
-    /// use concrete_core::backends::core::private::crypto::lwe::LweCiphertext;
-    /// use concrete_core::backends::core::private::crypto::secret::generators::{
-    ///     EncryptionRandomGenerator, SecretRandomGenerator,
-    /// };
-    /// use concrete_core::backends::core::private::crypto::secret::{GlweSecretKey, LweSecretKey};
-    /// use concrete_core::backends::core::private::math::fft::Complex64;
-    /// use concrete_core::backends::core::private::math::tensor::AsMutTensor;
-    ///
-    /// // define settings
-    /// let polynomial_size = PolynomialSize(1024);
-    /// let rlwe_dimension = GlweDimension(1);
-    /// let lwe_dimension = LweDimension(630);
-    ///
-    /// let level = DecompositionLevelCount(3);
-    /// let base_log = DecompositionBaseLog(7);
-    /// let std = LogStandardDev::from_log_standard_dev(-29.);
-    ///
-    /// let mut secret_generator = SecretRandomGenerator::new(None);
-    /// let mut encryption_generator = EncryptionRandomGenerator::new(None);
-    ///
-    /// let mut rlwe_sk =
-    ///     GlweSecretKey::generate_binary(rlwe_dimension, polynomial_size, &mut secret_generator);
-    /// let mut lwe_sk = LweSecretKey::generate_binary(lwe_dimension, &mut secret_generator);
-    ///
-    /// // allocation and generation of the key in coef domain:
-    /// let mut coef_bsk = StandardBootstrapKey::allocate(
-    ///     0 as u32,
-    ///     rlwe_dimension.to_glwe_size(),
-    ///     polynomial_size,
-    ///     level,
-    ///     base_log,
-    ///     lwe_dimension,
-    /// );
-    /// coef_bsk.fill_with_new_key(&lwe_sk, &rlwe_sk, std, &mut encryption_generator);
-    ///
-    /// // allocation for the bootstrapping key
-    /// let mut fourier_bsk = FourierBootstrapKey::allocate(
-    ///     Complex64::new(0., 0.),
-    ///     rlwe_dimension.to_glwe_size(),
-    ///     polynomial_size,
-    ///     level,
-    ///     base_log,
-    ///     lwe_dimension,
-    /// );
-    /// fourier_bsk.fill_with_forward_fourier(&coef_bsk);
-    ///
-    /// let message = Plaintext(2u32.pow(30));
-    ///
-    /// let mut lwe_in = LweCiphertext::allocate(0u32, lwe_dimension.to_lwe_size());
-    /// let mut lwe_out =
-    ///     LweCiphertext::allocate(0u32, LweSize(rlwe_dimension.0 * polynomial_size.0 + 1));
-    /// lwe_sk.encrypt_lwe(&mut lwe_in, &message, std, &mut encryption_generator);
-    ///
-    /// // accumulator is a trivial encryption of [0, 1/2N, 2/2N, ...]
-    /// let mut accumulator =
-    ///     GlweCiphertext::allocate(0u32, polynomial_size, rlwe_dimension.to_glwe_size());
-    /// accumulator
-    ///     .get_mut_body()
-    ///     .as_mut_tensor()
-    ///     .iter_mut()
-    ///     .enumerate()
-    ///     .for_each(|(i, a)| {
-    ///         *a = (i as f64 * 2_f64.powi(32_i32 - 10 - 1)).cast_into();
-    ///     });
-    ///
-    /// // bootstrap
-    /// fourier_bsk.bootstrap(&mut lwe_out, &lwe_in, &accumulator);
-    /// ```
-    fn bootstrap<C1, C2, C3>(
-        &self,
-        lwe_out: &mut LweCiphertext<C1>,
-        lwe_in: &LweCiphertext<C2>,
-        accumulator: &GlweCiphertext<C3>,
-    ) where
-        LweCiphertext<C1>: AsMutTensor<Element = Self::CiphertextScalar>,
-        LweCiphertext<C2>: AsRefTensor<Element = Self::CiphertextScalar>,
-        GlweCiphertext<C3>: AsRefTensor<Element = Self::CiphertextScalar>;
+#[derive(Debug, Clone)]
+pub struct FourierBskBuffers<Scalar> {
+    // Those buffers are also used to store the lut and the rounded input during the bootstrap.
+    lut_buffer: GlweCiphertext<Vec<Scalar>>,
+    rounded_buffer: GlweCiphertext<Vec<Scalar>>,
+    fft_buffers: FftBuffers,
+}
+
+impl<Scalar> FourierBskBuffers<Scalar>
+where
+    Scalar: UnsignedTorus,
+{
+    pub fn for_key<Key: LweBootstrapKeyEntity>(key: &Key) -> Self {
+        let poly_size = key.polynomial_size();
+        let glwe_size = key.glwe_dimension().to_glwe_size();
+        Self::new(poly_size, glwe_size)
+    }
+
+    pub fn new(poly_size: PolynomialSize, glwe_size: GlweSize) -> Self {
+        let fft = Fft::new(poly_size);
+        let first_buffer = FourierPolynomial::allocate(Complex64::new(0., 0.), poly_size);
+        let second_buffer = FourierPolynomial::allocate(Complex64::new(0., 0.), poly_size);
+        let output_buffer = Tensor::from_container(AlignedVec::new(poly_size.0 * glwe_size.0));
+        let lut_buffer = GlweCiphertext::allocate(Scalar::ZERO, poly_size, glwe_size);
+        let rounded_buffer = GlweCiphertext::allocate(Scalar::ZERO, poly_size, glwe_size);
+
+        Self {
+            lut_buffer,
+            rounded_buffer,
+            fft_buffers: FftBuffers {
+                fft,
+                first_buffer,
+                second_buffer,
+                output_buffer,
+            },
+        }
+    }
 }
 
 #[cfg(all(test, feature = "multithread"))]
